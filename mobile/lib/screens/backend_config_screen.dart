@@ -90,7 +90,7 @@ class _BackendConfigScreenState extends State<BackendConfigScreen> {
       // test reflects what the user is about to save. Restored in `finally`.
       ApiConfig.setCustomProxyHeaders(_customHeaders);
 
-      // Check /sessions/new page to verify it's a Sure backend
+      // Check /sessions/new page to verify it's a Founder Finance backend
       final sessionsUrl = Uri.parse('$normalizedUrl/sessions/new');
       final sessionsResponse =
           await http.get(sessionsUrl, headers: ApiConfig.htmlHeaders()).timeout(
@@ -269,7 +269,7 @@ class _BackendConfigScreenState extends State<BackendConfigScreen> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        '• https://demo.sure.am\n'
+                        '• http://localhost:3000\n'
                         '• https://your-domain.com\n'
                         '• http://localhost:3000',
                         style: TextStyle(

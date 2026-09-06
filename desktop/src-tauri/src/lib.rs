@@ -66,7 +66,7 @@ pub fn run() {
                 }
             }
             {
-                // The remote Sure page can emit events but cannot invoke custom
+                // The remote Founder Finance page can emit events but cannot invoke custom
                 // commands, so SSO is triggered via an event instead of invoke.
                 use tauri::Listener;
                 let handle = app.handle().clone();
@@ -139,7 +139,7 @@ pub fn run() {
             }
         })
         .build(tauri::generate_context!())
-        .expect("error while running Sure Desktop")
+        .expect("error while running Founder Finance Desktop")
         .run(|app, event| {
             // Clicking the dock icon (while the main window is hidden, not
             // destroyed) fires Reopen — re-show and focus the main window.

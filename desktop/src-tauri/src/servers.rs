@@ -61,7 +61,7 @@ fn split_base(input: &str) -> Result<(String, String), ServerError> {
 }
 
 /// Canonical form of a server address: origin plus the path it is served under.
-/// The path is kept, so a Sure mounted under a prefix (`https://host/sure`)
+/// The path is kept, so a Founder Finance mounted under a prefix (`https://host/sure`)
 /// works; `base_candidates` is what still resolves a pasted deep link.
 pub fn normalize_server_url(input: &str) -> Result<String, ServerError> {
     let (origin, path) = split_base(input)?;
@@ -202,7 +202,7 @@ pub fn save_active(url: &str) -> Result<(), ServerError> {
 }
 
 /// True if `url` is `base` itself or sits under it. The boundary check is what
-/// keeps `https://sure.example.com.evil.test` from passing as `https://sure.example.com`.
+/// keeps `https://founder-finance.example.com.evil.test` from passing as `https://founder-finance.example.com`.
 pub fn base_covers(base: &str, url: &str) -> bool {
     url == base || url.strip_prefix(base).is_some_and(|rest| rest.starts_with('/'))
 }

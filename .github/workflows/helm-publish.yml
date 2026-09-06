@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   publish:
-    if: github.repository == 'we-promise/sure'
+    if: github.repository == 'SujaltheBIGG/finance-tracker'
     runs-on: ubuntu-latest
     outputs:
       chart_version: ${{ steps.version.outputs.chart_version }}
@@ -66,7 +66,7 @@ jobs:
           # must match the OCI image tag in GHCR, which is published without a
           # leading `v`. Without this, a release on tag `v0.7.1-rc.1` writes
           # `appVersion: "v0.7.1-rc.1"` into Chart.yaml / index.yaml, and Helm
-          # then fails to pull `ghcr.io/we-promise/sure:v0.7.1-rc.1` (the real
+          # then fails to pull `ghcr.io/SujaltheBIGG/finance-tracker:v0.7.1-rc.1` (the real
           # tag is `0.7.1-rc.1`). See #2050.
           if [ -n "$APP_VERSION_INPUT" ]; then
             APP_VERSION="$(normalize_version "$APP_VERSION_INPUT")"

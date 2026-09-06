@@ -114,9 +114,9 @@ pl:
       disconnect_confirm: "Rozłączyć %{name}?"
       encryption_warning:
         title: Szyfrowanie bazy danych nie jest skonfigurowane
-        message: Skonfiguruj klucze szyfrowania Active Record przed dodaniem tokenów Brex w produkcji. Bez kluczy szyfrowania Sure przechowuje dane uwierzytelniające Brex w postaci zwykłego tekstu.
+        message: Skonfiguruj klucze szyfrowania Active Record przed dodaniem tokenów Brex w produkcji. Bez kluczy szyfrowania Founder Finance przechowuje dane uwierzytelniające Brex w postaci zwykłego tekstu.
       instructions:
-        copy_token_html: "Skopiuj token i dodaj go jako nazwane połączenie poniżej. Sure przechowuje token wyłącznie do synchronizacji tej rodziny."
+        copy_token_html: "Skopiuj token i dodaj go jako nazwane połączenie poniżej. Founder Finance przechowuje token wyłącznie do synchronizacji tej rodziny."
         create_token: "Utwórz token API z następującymi zakresami tylko do odczytu: accounts.cash.readonly, accounts.card.readonly, transactions.cash.readonly, transactions.card.readonly"
         open_tokens: Przejdź do ustawień tokenów API Brex dla firmy, którą chcesz połączyć
         sign_in_html: "Odwiedź %{link} i zaloguj się na konto, które chcesz połączyć"

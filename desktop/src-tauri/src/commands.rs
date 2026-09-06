@@ -102,7 +102,7 @@ pub fn grant_server_capability(app: &tauri::AppHandle, origin: &str) {
 /// and opens {server}/auth/desktop/{provider}?code_challenge=... in the browser.
 ///
 /// Callable directly (local pages) or via the "sure://start-sso" event (the
-/// remote Sure page can emit events but cannot invoke custom commands).
+/// remote Founder Finance page can emit events but cannot invoke custom commands).
 pub fn begin_sso(app: &tauri::AppHandle, server: String, provider: String) -> Result<(), String> {
     let canonical = normalize_server_url(&server).map_err(|e| e.to_string())?;
     // Only start SSO for a server the user has actually added. This event can be

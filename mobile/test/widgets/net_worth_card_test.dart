@@ -30,13 +30,13 @@ void main() {
     );
   }
 
-  // The hero card must resolve the canonical Sure card chrome (mirrors
+  // The hero card must resolve the canonical Founder Finance card chrome (mirrors
   // SureCard) in both themes, so a token regression in either mode is caught.
   for (final (brightness, tokens) in [
     (Brightness.light, SureTokens.light),
     (Brightness.dark, SureTokens.dark),
   ]) {
-    testWidgets('net worth card paints Sure card chrome from tokens (${brightness.name})',
+    testWidgets('net worth card paints Founder Finance card chrome from tokens (${brightness.name})',
         (tester) async {
       await pump(tester, brightness: brightness);
 

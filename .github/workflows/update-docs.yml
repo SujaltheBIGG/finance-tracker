@@ -7,7 +7,7 @@ on:
 
 jobs:
   update-docs:
-    if: github.repository == 'we-promise/sure'
+    if: github.repository == 'SujaltheBIGG/finance-tracker'
     permissions: {}
     runs-on: ubuntu-latest
     steps:

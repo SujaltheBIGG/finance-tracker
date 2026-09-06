@@ -35,7 +35,7 @@ ru:
       password: Пароль
       password_placeholder: Введите ваш пароль
       submit: Войти
-      title: Sure
+      title: Founder Finance
     openid_connect:
       account_linked: Учётная запись успешно связана с %{provider}
       failed: Не удалось аутентифицироваться через OpenID Connect.

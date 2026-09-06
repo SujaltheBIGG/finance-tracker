@@ -19,7 +19,7 @@ tr:
       setup_accounts: "Hesapları ayarla"
       delete: "Sil"
       accounts_need_setup: "Hesap kurulumu gerekli"
-      accounts_need_setup_description: "Trade Republic hesabınız bir Sure hesabına bağlanmalıdır."
+      accounts_need_setup_description: "Trade Republic hesabınız bir Founder Finance hesabına bağlanmalıdır."
       no_accounts_discovered: "Henüz Trade Republic hesabı keşfedilmedi."
       no_accounts_discovered_description: "Hesabınızı keşfetmek için girişi tamamlayıp senkronizasyon çalıştırın."
       data_quality:

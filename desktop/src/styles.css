@@ -1,10 +1,10 @@
-/* Onboarding chrome styled to match Sure's real auth page (design-system tokens). */
+/* Onboarding chrome styled to match Founder Finance's real auth page (design-system tokens). */
 :root {
   --titlebar-h: 38px;
   font-family: -apple-system, system-ui, "Segoe UI", sans-serif;
   color-scheme: light dark;
 
-  /* Sure light palette */
+  /* Founder Finance light palette */
   --bg: var(--color-surface);
   --container: var(--color-container);
   --text: var(--color-black);
@@ -75,7 +75,7 @@ body { background: var(--bg); color: var(--text); }
 
 .auth-form { display: flex; flex-direction: column; gap: 12px; }
 
-/* Mirrors .form-field from Sure's design system. */
+/* Mirrors .form-field from Founder Finance's design system. */
 .form-field {
   display: flex;
   flex-direction: column;

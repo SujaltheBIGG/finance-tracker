@@ -116,10 +116,10 @@ tr:
         revoked: Bağlantı iptal edildi.
       show:
         connect_subtitle: Bu URL'yi Claude.ai'ye (veya herhangi bir MCP uyumlu istemciye)
-          yapıştırarak Sure hesabınıza bağlayın.
+          yapıştırarak Founder Finance hesabınıza bağlayın.
         connect_title: Bir yapay zeka asistanı bağlayın
         connected_ago: "%{time} önce bağlandı"
-        connected_subtitle: Bu uygulamalar şu anda Sure verilerinize erişebiliyor.
+        connected_subtitle: Bu uygulamalar şu anda Founder Finance verilerinize erişebiliyor.
           Artık kullanmadıklarınızın erişimini iptal edin.
         connected_title: Bağlı istemciler
         copied: Kopyalandı!
@@ -131,7 +131,7 @@ tr:
         step_1: Claude.ai'yi açın ve Ayarlar → Özelleştir → Bağlayıcılar'a gidin.
         step_2: '"Bağlayıcı ekle"ye tıklayın ve yukarıdaki MCP sunucu URL''sini
           yapıştırın.'
-        step_3: Bağlan'a tıklayın — giriş yapmak ve erişimi yetkilendirmek için Sure'a
+        step_3: Bağlan'a tıklayın — giriş yapmak ve erişimi yetkilendirmek için Founder Finance'a
           yönlendirileceksiniz.
         step_4: Yetkilendirildikten sonra Claude, hesaplarınızı, işlemlerinizi ve
           bakiye verilerinizi okuyabilir.
@@ -232,7 +232,7 @@ tr:
           title: Hesap sıfırlansın mı?
         confirm_reset_with_sample_data:
           body: Hesabınızı sıfırlamak ve örnek veri yüklemek istediğinizden emin misiniz?
-            Bu işlem mevcut verilerinizi silecek ve Sure'u güvenle keşfedebilmeniz
+            Bu işlem mevcut verilerinizi silecek ve Founder Finance'u güvenle keşfedebilmeniz
             için demo verilerle değiştirecektir.
           title: Hesap sıfırlansın ve örnek veri yüklensin mi?
         danger_zone_title: Tehlikeli Alan
@@ -265,7 +265,7 @@ tr:
           hesabınızı koruyacaktır.
         reset_account_with_sample_data: Hesabı sıfırla ve örnek veri yükle
         reset_account_with_sample_data_warning: Hesabınızı sıfırlamak mevcut tüm verilerinizi
-          silecek ve önceden doldurulmuş bir ortamda Sure'u keşfedebilmeniz için yeni
+          silecek ve önceden doldurulmuş bir ortamda Founder Finance'u keşfedebilmeniz için yeni
           örnek veriler yükleyecektir.
         save: Kaydet
         unconfirmed_email_notice_html: E-postanızı %{email} olarak değiştirmeyi talep
@@ -278,7 +278,7 @@ tr:
         step_3: Jetonları aşağıya yapıştırın, kaydedin, ardından senkronize hesaplarınızı
           bağlayın.
       bank_sync:
-        lede: İşlemlerin, bakiyelerin ve varlıkların otomatik olarak Sure'a akması
+        lede: İşlemlerin, bakiyelerin ve varlıkların otomatik olarak Founder Finance'a akması
           için harici hesapları bağlayın.
         page_title: Banka senkronizasyonu
       binance_panel:
@@ -295,7 +295,7 @@ tr:
           iletişime geçin.
         ip_hint_title: IP beyaz listeye alma gerekli
         no_withdraw_body: Binance API anahtarınızı oluştururken çekme izinlerini etkinleştirmeyin.
-          Sure yalnızca okuma erişimine ihtiyaç duyar.
+          Founder Finance yalnızca okuma erişimine ihtiyaç duyar.
         no_withdraw_title: Yalnızca salt okunur anahtar
         setup_instructions: 'Binance''ı bağlamak için salt okunur bir API anahtarı
           oluşturun:'
@@ -328,7 +328,7 @@ tr:
         sync: Senkronize et
         syncing: Senkronize ediliyor...
       connect: Bağlan
-      drawer_trust_statement: Salt okunur erişim. Sure asla para transferi yapamaz
+      drawer_trust_statement: Salt okunur erişim. Founder Finance asla para transferi yapamaz
         ve kimlik bilgileriniz şifrelenmiş olarak saklanır.
       empty_filter: Filtrenizle eşleşen sağlayıcı yok.
       enable_banking_panel:
@@ -400,7 +400,7 @@ tr:
         query_id_placeholder_existing: Mevcut Sorgu ID'sini korumak için boş bırakın
         query_id_placeholder_new: IBKR Flex Query ID'nizi girin
         report_window_note: IBKR Flex raporları, IBKR'de yapılandırdığınız sorgu penceresiyle
-          sınırlıdır. Sure, bu rapordan mevcut tüm varlıkları ve son 365 güne kadar
+          sınırlıdır. Founder Finance, bu rapordan mevcut tüm varlıkları ve son 365 güne kadar
           olan işlem geçmişini içe aktaracaktır.
         save_configuration: Yapılandırmayı Kaydet
         sections:
@@ -435,7 +435,7 @@ tr:
             bölümüne gidin.
           step_2: Yeni bir sorgu oluşturmak için "Activity Flex Query" bölümündeki
             "+" simgesine tıklayın.
-          step_3: Sorgunuza bir ad verin (ör. "Sure Sync"), ardından aşağıdaki Flex
+          step_3: Sorgunuza bir ad verin (ör. "Founder Finance Sync"), ardından aşağıdaki Flex
             Query ayrıntılarını inceleyin ve listelenen bölümleri, alanları ve yapılandırma
             seçeneklerini etkinleştirin.
           step_4: Sorguyu kaydedin, "Query ID"nizi not edin, ardından bir erişim Token'ı
@@ -463,7 +463,7 @@ tr:
         keep_api_key_placeholder: Mevcut API anahtarını korumak için boş bırakın
         keep_api_secret_placeholder: Mevcut özel anahtarı korumak için boş bırakın
         read_only_body: İşlem yapma, iptal etme, çekme, dışa aktarma, defter, Earn,
-          stake etme veya transfer izinleri vermeyin. Sure yalnızca bakiyeleri, varlıkları
+          stake etme veya transfer izinleri vermeyin. Founder Finance yalnızca bakiyeleri, varlıkları
           ve spot işlem gerçekleşmelerini içe aktarır.
         read_only_title: Yalnızca salt okunur borsa senkronizasyonu
         setup_accounts: Hesabı kur

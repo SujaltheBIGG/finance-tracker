@@ -131,8 +131,8 @@ jobs:
             org.opencontainers.image.created=${{ steps.date.outputs.date }}
             org.opencontainers.image.ref.name=${{ github.ref_name }}
             org.opencontainers.image.vendor=we-promise
-            org.opencontainers.image.title=Sure
-            org.opencontainers.image.description=A multi-arch Docker image for the Sure Rails app
+            org.opencontainers.image.title=Founder Finance
+            org.opencontainers.image.description=A multi-arch Docker image for the Founder Finance Rails app
 
       - name: Publish 'linux/${{ matrix.platform }}' image by digest
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
@@ -222,8 +222,8 @@ jobs:
             "index:org.opencontainers.image.ref.name=${REF_NAME}"
             'index:org.opencontainers.image.vendor=we-promise'
             'index:org.opencontainers.image.licenses=AGPL-3.0'
-            'index:org.opencontainers.image.title=Sure'
-            'index:org.opencontainers.image.description=A multi-arch Docker image for the Sure Rails app'
+            'index:org.opencontainers.image.title=Founder Finance'
+            'index:org.opencontainers.image.description=A multi-arch Docker image for the Founder Finance Rails app'
           )
           annotation_args=()
           for annotation in "${annotations[@]}"; do

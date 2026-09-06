@@ -19,7 +19,7 @@ pl:
       setup_accounts: Konfiguruj konta
       delete: Usuń
       accounts_need_setup: Konta wymagają konfiguracji
-      accounts_need_setup_description: Niektóre konta z IBKR wymagają połączenia z kontami Sure.
+      accounts_need_setup_description: Niektóre konta z IBKR wymagają połączenia z kontami Founder Finance.
       no_accounts_discovered: Nie odkryto jeszcze kont IBKR.
       no_accounts_discovered_description: Uruchom synchronizację po skonfigurowaniu zapytania Flex, aby odkryć konta.
     setup_accounts:
@@ -36,7 +36,7 @@ pl:
       status:
         fetching_accounts: Pobieranie kont z Interactive Brokers...
         no_accounts_found_title: Nie znaleziono kont.
-        no_accounts_found_description: Sure nie znalazł żadnych kont IBKR w najnowszym raporcie Flex.
+        no_accounts_found_description: Founder Finance nie znalazł żadnych kont IBKR w najnowszym raporcie Flex.
       available_accounts:
         title: Dostępne konta
         account_type_investment: Inwestycyjne

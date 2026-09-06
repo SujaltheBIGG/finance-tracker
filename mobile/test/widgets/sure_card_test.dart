@@ -30,7 +30,7 @@ void main() {
     (Brightness.light, SureTokens.light),
     (Brightness.dark, SureTokens.dark),
   ]) {
-    testWidgets('paints the Sure card chrome from tokens (${brightness.name})',
+    testWidgets('paints the Founder Finance card chrome from tokens (${brightness.name})',
         (tester) async {
       await pump(tester, const SureCard(child: Text('Body')),
           brightness: brightness);

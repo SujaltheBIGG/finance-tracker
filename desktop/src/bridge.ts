@@ -1,11 +1,11 @@
 // Injected into every page loaded in the main window (local onboarding + the
-// remote Sure site). Adds native-titlebar chrome, drags the window, forwards
+// remote Founder Finance site). Adds native-titlebar chrome, drags the window, forwards
 // notifications/badge to Rust, intercepts SSO into the system browser, and
 // navigates on server switches.
 (() => {
   const tauri = (window as any).__TAURI__;
 
-  // Diagnostics — visible in DevTools console. On the remote Sure page, IPC only
+  // Diagnostics — visible in DevTools console. On the remote Founder Finance page, IPC only
   // works if withGlobalTauri is set AND a capability's remote.urls matches.
   // eslint-disable-next-line no-console
   console.log("[sure] bridge loaded", {
@@ -19,7 +19,7 @@
   // Native titlebar chrome — offset the left icon rail so its logo clears the
   // traffic lights, and make the top ~34px band drag the window. Using a
   // document-level mousedown (rather than a fixed overlay strip) means dragging
-  // works on every page regardless of Sure's own sticky headers, while its
+  // works on every page regardless of Founder Finance's own sticky headers, while its
   // interactive controls in that band stay clickable. Main content is not
   // pushed down.
   if (!(window as any).__sureChrome) {
@@ -38,7 +38,7 @@
           el &&
           el.closest("a,button,input,select,textarea,label,[role='button'],[contenteditable],[data-no-drag]")
         ) {
-          return; // let Sure's own controls in the titlebar band work
+          return; // let Founder Finance's own controls in the titlebar band work
         }
         try {
           tauri?.window?.getCurrentWindow?.().startDragging?.();
@@ -106,7 +106,7 @@
     });
   }
 
-  // Sync-complete + alert toasts: Sure renders flash/notification nodes.
+  // Sync-complete + alert toasts: Founder Finance renders flash/notification nodes.
   const seen = new WeakSet<Element>();
   const scan = () => {
     document.querySelectorAll("[data-notification], .flash, [role='alert']").forEach((node) => {
@@ -114,7 +114,7 @@
       seen.add(node);
       const text = (node.textContent || "").trim();
       if (!text) return;
-      emit("bridge://notify", { title: "Sure", body: text.slice(0, 180) });
+      emit("bridge://notify", { title: "Founder Finance", body: text.slice(0, 180) });
     });
     // Dock badge: any element the page exposes with data-attention-count.
     const badgeEl = document.querySelector("[data-attention-count]");

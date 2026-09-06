@@ -66,7 +66,7 @@ tr:
           yapılandırın. Şifreleme olmadan, token'lar düz metin olarak saklanır.
         title: Veritabanı şifrelemesi yapılandırılmamış
       instructions:
-        copy_token_html: Token'ı kopyalayın ve aşağıya yapıştırın. Sure bunu yalnızca
+        copy_token_html: Token'ı kopyalayın ve aşağıya yapıştırın. Founder Finance bunu yalnızca
           bakiyelerinizi ve işlemlerinizi eşitlemek için kullanır.
         create_token: Salt okunur erişimle yeni bir kişisel API token'ı oluşturun
         open_tokens: Settings → Connect and manage apps → Developer tools → API tokens bölümüne gidin
@@ -86,7 +86,7 @@ tr:
       description: "%{product_name} hesabınıza bağlamak istediğiniz Wise para birimi
         bakiyesini seçin."
       link_account: Bakiyeyi bağla
-      no_accounts_found: Tüm Wise bakiyeleri zaten Sure hesaplarına bağlı.
+      no_accounts_found: Tüm Wise bakiyeleri zaten Founder Finance hesaplarına bağlı.
       no_connection: Wise bağlantısı bulunamadı. Lütfen önce Sağlayıcı Ayarlarında
         Wise'ı bağlayın.
       title: Wise Bakiyesini Seç
@@ -101,17 +101,17 @@ tr:
       already_connected_label: Zaten bağlı
       cancel: İptal
       connect: Seçilen profilleri bağla
-      description: Wise hesabınızın birden fazla profili var. Sure ile eşitlemek istediklerinizi
+      description: Wise hesabınızın birden fazla profili var. Founder Finance ile eşitlemek istediklerinizi
         seçin.
       session_expired: Oturum süresi doldu. Lütfen tekrar bağlanmayı deneyin.
       subtitle: Hangi profillerin bağlanacağını seçin
       title: Wise Profillerini Seç
       unnamed_profile: "(Adsız profil)"
     setup_accounts:
-      all_accounts_linked: Tüm Wise para birimi bakiyeleriniz Sure hesaplarına bağlandı.
+      all_accounts_linked: Tüm Wise para birimi bakiyeleriniz Founder Finance hesaplarına bağlandı.
       create_account: Hesap Oluştur
       description: Takip etmek istediğiniz her Wise para birimi bakiyesi için bir
-        Sure hesabı oluşturun. Her para birimi kendi hesabı olur.
+        Founder Finance hesabı oluşturun. Her para birimi kendi hesabı olur.
       done: Bitti
       no_accounts_to_setup: Tüm hesaplar kuruldu
       subtitle: Wise para birimi bakiyelerinizi bağlayın
@@ -155,11 +155,11 @@ tr:
       deletion_in_progress: silme işlemi devam ediyor...
       error: Eşitleme hatası
       no_accounts_description: Wise bakiyelerinizi keşfetmek için bir eşitleme çalıştırın,
-        ardından bunları Sure hesaplarına bağlayın.
+        ardından bunları Founder Finance hesaplarına bağlayın.
       no_accounts_title: Henüz bağlı hesap yok
       setup_action: Hesapları Kur
       setup_description: "%{total} hesaptan %{linked} tanesi bağlandı. Wise para birimi
-        bakiyeleriniz için Sure hesapları oluşturun."
+        bakiyeleriniz için Founder Finance hesapları oluşturun."
       setup_needed: Kurulmaya hazır yeni hesaplar var
       status: "%{timestamp} önce eşitlendi"
       status_never: Hiç eşitlenmedi

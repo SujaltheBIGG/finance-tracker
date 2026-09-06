@@ -44,7 +44,7 @@ tr:
             bağlanabilirsiniz.
           title: Harici asistan bağlantısı kesilsin mi?
         description: Sohbet asistanının nasıl yanıt vereceğini seçin. Yerleşik, yapılandırdığınız
-          LLM sağlayıcısını doğrudan kullanır. Harici, MCP aracılığıyla Sure'un finansal
+          LLM sağlayıcısını doğrudan kullanır. Harici, MCP aracılığıyla Founder Finance'un finansal
           araçlarını çağırabilen uzak bir yapay zeka ajanına devreder.
         disconnect_button: Bağlantıyı kes
         disconnect_description: Harici asistan bağlantısını kaldırın ve yerleşik asistana

@@ -1,7 +1,7 @@
-# Sure Desktop (macOS)
+# Founder Finance Desktop (macOS)
 
-Native macOS shell (Tauri 2 + WKWebView) that renders the full Sure web app and
-wraps it in real Mac chrome. It always talks to a Sure server you already run
+Native macOS shell (Tauri 2 + WKWebView) that renders the full Founder Finance web app and
+wraps it in real Mac chrome. It always talks to a Founder Finance server you already run
 (self-hosted or managed) — same trust model as a browser.
 
 ## Requirements
@@ -14,7 +14,7 @@ npm install
 npm run build      # builds the injected bridge.js + onboarding assets
 npm run tauri dev
 ```
-On first launch, enter your Sure server URL (e.g. `http://localhost:3000` when
+On first launch, enter your Founder Finance server URL (e.g. `http://localhost:3000` when
 running `bin/dev`). The app health-checks `{server}/up`, then loads the real
 `/sessions/new` where you sign in with password or SSO (MFA supported).
 
@@ -30,7 +30,7 @@ npm run tauri build -- --target universal-apple-darwin
 ```
 
 ## Publishing a release
-The desktop build runs automatically as part of the normal Sure `v*` release.
+The desktop build runs automatically as part of the normal Founder Finance `v*` release.
 The version comes from `.sure-version` and must match the release tag; it is
 stamped into `desktop/package.json` and `desktop/src-tauri/tauri.conf.json`
 only while building. The universal `.dmg` is attached to that same GitHub
@@ -39,7 +39,7 @@ Release—there is no separate desktop action, tag, or version.
 ## Installing an unsigned build (end users)
 The published `.dmg` is **not code-signed**, so macOS Gatekeeper blocks the first
 launch. To open it:
-1. Drag Sure to Applications and try to open it; dismiss the warning.
+1. Drag Founder Finance to Applications and try to open it; dismiss the warning.
 2. **System Settings → Privacy & Security**, scroll down, click **Open Anyway**,
    and confirm. (On macOS 15 Sequoia the old right-click→Open shortcut is gone;
    this Settings path is the way.)
@@ -47,7 +47,7 @@ launch. To open it:
 If macOS instead says the app is "damaged", the download was quarantined — strip
 it once in Terminal:
 ```bash
-xattr -cr /Applications/Sure.app
+xattr -cr /Applications/Founder Finance.app
 ```
 Signing + notarization (below) removes this friction entirely.
 

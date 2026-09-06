@@ -27,7 +27,7 @@ fr:
       oauth_connect_button: Se connecter avec SnapTrade
       oauth_reauthorize_button: Réautoriser
       oauth_status_authorized: Autorisé avec SnapTrade.
-      oauth_status_ready: Utilisez un code d'appareil pour autoriser Sure pour SnapTrade.
+      oauth_status_ready: Utilisez un code d'appareil pour autoriser Founder Finance pour SnapTrade.
       oauth_title: SnapTrade OAuth
       orphaned_connection: Connexion orpheline (non synchronisée localement)
       setup_accounts_button: Configurer les comptes
@@ -157,7 +157,7 @@ fr:
       requires_update: Connexion à mettre à jour
       setup_accounts_menu: Configurer les comptes
       setup_action: Configurer les comptes
-      setup_description: Certains comptes de SnapTrade doivent être liés à des comptes Sure.
+      setup_description: Certains comptes de SnapTrade doivent être liés à des comptes Founder Finance.
       setup_needed: Comptes à configurer
       status: Dernière synchronisation il y a %{timestamp} - %{summary}
       status_never: Jamais synchronisé

@@ -79,7 +79,7 @@ uk:
         sign_in_html: "Відвідайте %{link} та увійдіть до свого облікового запису"
         open_tokens: "Перейдіть до Налаштування → Токени API"
         create_token: "Створіть новий особистий токен API з доступом лише для читання"
-        copy_token_html: "Скопіюйте токен і вставте його нижче. Sure використовує його лише для синхронізації ваших балансів і транзакцій."
+        copy_token_html: "Скопіюйте токен і вставте його нижче. Founder Finance використовує його лише для синхронізації ваших балансів і транзакцій."
     provider_connection:
       default_name: Wise
       default_description: Підключіть свій мультивалютний рахунок Wise
@@ -96,7 +96,7 @@ uk:
       session_expired: Сеанс закінчився. Спробуйте підключитися ще раз.
       title: Виберіть профілі Wise
       subtitle: Виберіть, які профілі підключити
-      description: Ваш обліковий запис Wise має кілька профілів. Виберіть ті, які ви хочете синхронізувати з Sure.
+      description: Ваш обліковий запис Wise має кілька профілів. Виберіть ті, які ви хочете синхронізувати з Founder Finance.
       unnamed_profile: "(Безіменний профіль)"
       already_connected_label: Вже підключено
       connect: Підключити вибрані профілі
@@ -110,22 +110,22 @@ uk:
       status_with_summary: "Остання синхронізація %{timestamp} тому — %{summary}"
       delete: Відключити
       setup_needed: Нові рахунки готові до налаштування
-      setup_description: "%{linked} з %{total} рахунків пов'язано. Створіть рахунки Sure для ваших валютних балансів Wise."
+      setup_description: "%{linked} з %{total} рахунків пов'язано. Створіть рахунки Founder Finance для ваших валютних балансів Wise."
       setup_action: Налаштувати рахунки
       no_accounts_title: Ще немає пов'язаних рахунків
-      no_accounts_description: Запустіть синхронізацію, щоб виявити ваші баланси Wise, а потім пов'яжіть їх з рахунками Sure.
+      no_accounts_description: Запустіть синхронізацію, щоб виявити ваші баланси Wise, а потім пов'яжіть їх з рахунками Founder Finance.
     setup_accounts:
       title: Налаштувати рахунки Wise
       subtitle: Пов'яжіть свої валютні баланси Wise
-      description: Створіть рахунок Sure для кожного валютного балансу Wise, який ви хочете відстежувати. Кожна валюта стає окремим рахунком.
+      description: Створіть рахунок Founder Finance для кожного валютного балансу Wise, який ви хочете відстежувати. Кожна валюта стає окремим рахунком.
       no_accounts_to_setup: Усі рахунки налаштовано
-      all_accounts_linked: Усі ваші валютні баланси Wise пов'язано з рахунками Sure.
+      all_accounts_linked: Усі ваші валютні баланси Wise пов'язано з рахунками Founder Finance.
       create_account: Створити рахунок
       done: Готово
     select_accounts:
       title: Виберіть баланс Wise
       description: Виберіть валютний баланс Wise, який ви хочете пов'язати зі своїм рахунком %{product_name}.
-      no_accounts_found: Усі баланси Wise вже пов'язано з рахунками Sure.
+      no_accounts_found: Усі баланси Wise вже пов'язано з рахунками Founder Finance.
       no_connection: З'єднання Wise не знайдено. Спочатку підключіть Wise у налаштуваннях провайдера.
       link_account: Пов'язати баланс
       cancel: Скасувати

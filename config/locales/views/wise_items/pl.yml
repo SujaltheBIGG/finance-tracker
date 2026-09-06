@@ -96,7 +96,7 @@ pl:
         sign_in_html: "Odwiedź %{link} i zaloguj się na swoje konto"
         open_tokens: "Przejdź do Settings → Connect and manage apps → Developer tools → API tokens"
         create_token: "Utwórz nowy osobisty token API z dostępem tylko do odczytu"
-        copy_token_html: "Skopiuj token i wklej go poniżej. Sure używa go tylko do synchronizacji sald i transakcji."
+        copy_token_html: "Skopiuj token i wklej go poniżej. Founder Finance używa go tylko do synchronizacji sald i transakcji."
     provider_connection:
       default_name: Wise
       default_description: Połącz swoje wielowalutowe konto Wise
@@ -115,7 +115,7 @@ pl:
       session_expired: Sesja wygasła. Spróbuj połączyć ponownie.
       title: Wybierz profile Wise
       subtitle: Wybierz, które profile połączyć
-      description: Twoje konto Wise ma wiele profili. Wybierz te, które chcesz synchronizować z Sure.
+      description: Twoje konto Wise ma wiele profili. Wybierz te, które chcesz synchronizować z Founder Finance.
       unnamed_profile: "(Profil bez nazwy)"
       already_connected_label: Już połączone
       connect: Połącz wybrane profile
@@ -129,22 +129,22 @@ pl:
       status_with_summary: "Ostatnia synchronizacja %{timestamp} temu — %{summary}"
       delete: Rozłącz
       setup_needed: Nowe konta gotowe do konfiguracji
-      setup_description: "%{linked} z %{total} kont połączonych. Utwórz konta Sure dla swoich sald walutowych Wise."
+      setup_description: "%{linked} z %{total} kont połączonych. Utwórz konta Founder Finance dla swoich sald walutowych Wise."
       setup_action: Konfiguruj konta
       no_accounts_title: Brak połączonych kont
-      no_accounts_description: Uruchom synchronizację, aby odkryć salda Wise, a następnie połącz je z kontami Sure.
+      no_accounts_description: Uruchom synchronizację, aby odkryć salda Wise, a następnie połącz je z kontami Founder Finance.
     setup_accounts:
       title: Skonfiguruj konta Wise
       subtitle: Połącz swoje salda walutowe Wise
-      description: Utwórz konto Sure dla każdego salda walutowego Wise, które chcesz śledzić. Każda waluta staje się osobnym kontem.
+      description: Utwórz konto Founder Finance dla każdego salda walutowego Wise, które chcesz śledzić. Każda waluta staje się osobnym kontem.
       no_accounts_to_setup: Wszystkie konta są skonfigurowane
-      all_accounts_linked: Wszystkie salda walutowe Wise zostały połączone z kontami Sure.
+      all_accounts_linked: Wszystkie salda walutowe Wise zostały połączone z kontami Founder Finance.
       create_account: Utwórz konto
       done: Gotowe
     select_accounts:
       title: Wybierz saldo Wise
       description: Wybierz saldo walutowe Wise, które chcesz połączyć z kontem %{product_name}.
-      no_accounts_found: Wszystkie salda Wise są już połączone z kontami Sure.
+      no_accounts_found: Wszystkie salda Wise są już połączone z kontami Founder Finance.
       no_connection: Nie znaleziono połączenia Wise. Najpierw połącz Wise w ustawieniach dostawcy.
       link_account: Połącz saldo
       cancel: Anuluj

@@ -17,7 +17,7 @@ class SureTheme {
       onPrimary: tokens.textInverse,
       // The container roles were unset, so on screens not yet redesigned with
       // SureColors (e.g. Chats) Material defaulted them to a blue that read as
-      // off-brand on FAB/badge/avatar surfaces. Pin them to a neutral Sure
+      // off-brand on FAB/badge/avatar surfaces. Pin them to a neutral Founder Finance
       // surface with primary text on top. `primary`/`secondary` stay link/info so
       // existing link/accent callers are unchanged; the prominent neutral primary
       // action color is applied to FABs via floatingActionButtonTheme below.
@@ -87,7 +87,7 @@ class SureTheme {
           ),
         ),
       ),
-      // The FAB is Sure's primary action surface — use the neutral brand primary
+      // The FAB is Founder Finance's primary action surface — use the neutral brand primary
       // (near-black in light, white in dark) so it reads as the prominent action
       // instead of the subtle primaryContainer the Material 3 default would use.
       floatingActionButtonTheme: FloatingActionButtonThemeData(

@@ -19,7 +19,7 @@ uk:
       setup_accounts: "Налаштувати рахунки"
       delete: "Видалити"
       accounts_need_setup: "Рахунок потребує налаштування"
-      accounts_need_setup_description: "Ваш рахунок Trade Republic потрібно пов’язати з рахунком Sure."
+      accounts_need_setup_description: "Ваш рахунок Trade Republic потрібно пов’язати з рахунком Founder Finance."
       no_accounts_discovered: "Рахунок Trade Republic ще не знайдено."
       no_accounts_discovered_description: "Завершіть вхід і запустіть синхронізацію, щоб знайти рахунок."
       data_quality:

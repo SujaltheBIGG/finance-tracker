@@ -218,7 +218,7 @@ jobs:
 
           if [ ! -f "$README" ]; then
             # No README yet — create one
-            printf "# Sure\n\n%s\n" "$SECTION" > "$README"
+            printf "# Founder Finance\n\n%s\n" "$SECTION" > "$README"
           elif grep -q '<!-- MOBILE_DOWNLOADS_START -->' "$README"; then
             # Write section to a temp file so awk can read it without quoting issues
             printf '%s\n' "$SECTION" > "${README}.section"

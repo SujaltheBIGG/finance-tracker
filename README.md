@@ -1,26 +1,26 @@
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/we-promise/sure)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/SujaltheBIGG/finance-tracker)
 [![View performance data on Skylight](https://badges.skylight.io/typical/s6PEZSKwcklL.svg)](https://oss.skylight.io/app/applications/s6PEZSKwcklL)
 [![Dosu](https://raw.githubusercontent.com/dosu-ai/assets/main/dosu-badge.svg)](https://app.dosu.dev/a72bdcfd-15f5-4edc-bd85-ea0daa6c3adc/ask)
-[![Pipelock Security Scan](https://github.com/we-promise/sure/actions/workflows/pipelock.yml/badge.svg)](https://github.com/we-promise/sure/actions/workflows/pipelock.yml)
+[![Pipelock Security Scan](https://github.com/SujaltheBIGG/finance-tracker/actions/workflows/pipelock.yml/badge.svg)](https://github.com/SujaltheBIGG/finance-tracker/actions/workflows/pipelock.yml)
 
-<img width="1270" height="1140" alt="sure_shot" src="https://github.com/user-attachments/assets/9c6e03cc-3490-40ab-9a68-52e042c51293" />
+<img width="1270" height="1140" alt="founder_finance_shot" src="https://github.com/user-attachments/assets/9c6e03cc-3490-40ab-9a68-52e042c51293" />
 
 <p align="center">
   <!-- Keep these links. Translations will automatically update with the README. -->
-  <a href="https://readme-i18n.com/de/we-promise/sure">Deutsch</a> | 
-  <a href="https://readme-i18n.com/es/we-promise/sure">Español</a> | 
-  <a href="https://readme-i18n.com/fr/we-promise/sure">Français</a> | 
-  <a href="https://readme-i18n.com/ja/we-promise/sure">日本語</a> | 
-  <a href="https://readme-i18n.com/ko/we-promise/sure">한국어</a> | 
-  <a href="https://readme-i18n.com/pt/we-promise/sure">Português</a> | 
-  <a href="https://readme-i18n.com/ru/we-promise/sure">Русский</a> | 
-  <a href="https://readme-i18n.com/zh/we-promise/sure">中文</a>
+  <a href="https://readme-i18n.com/de/SujaltheBIGG/finance-tracker">Deutsch</a> |
+  <a href="https://readme-i18n.com/es/SujaltheBIGG/finance-tracker">Español</a> |
+  <a href="https://readme-i18n.com/fr/SujaltheBIGG/finance-tracker">Français</a> |
+  <a href="https://readme-i18n.com/ja/SujaltheBIGG/finance-tracker">日本語</a> |
+  <a href="https://readme-i18n.com/ko/SujaltheBIGG/finance-tracker">한국어</a> |
+  <a href="https://readme-i18n.com/pt/SujaltheBIGG/finance-tracker">Português</a> |
+  <a href="https://readme-i18n.com/ru/SujaltheBIGG/finance-tracker">Русский</a> |
+  <a href="https://readme-i18n.com/zh/SujaltheBIGG/finance-tracker">中文</a>
 </p>
 
-# Sure: The personal finance app for everyone
+# Founder Finance: The personal finance app for everyone
 
 <b>Get
-involved: [Discord](https://discord.gg/36ZGBsxYEK) • [Website](https://sure.am) • [Issues](https://github.com/we-promise/sure/issues)</b>
+involved: [Discord](https://discord.gg/36ZGBsxYEK) • [Website](https://github.com/SujaltheBIGG/finance-tracker) • [Issues](https://github.com/SujaltheBIGG/finance-tracker/issues)</b>
 
 > [!IMPORTANT]
 > This repository is a community fork of the now-abandoned Maybe Finance project. <br />
@@ -40,11 +40,11 @@ That also didn’t work out — at least not as a sustainable B2C business — s
 
 Join us!
 
-## Hosting Sure
+## Hosting Founder Finance
 
-Sure is a fully working personal finance app that can be [self hosted with Docker](docs/hosting/docker.md).
-Sure can be accessed from a browser, the macOS desktop app, the mobile app, API
-clients, and LLM agents. See [Sure Clients](docs/clients.md) for an overview.
+Founder Finance is a fully working personal finance app that can be [self hosted with Docker](docs/hosting/docker.md).
+Founder Finance can be accessed from a browser, the macOS desktop app, the mobile app, API
+clients, and LLM agents. See [Founder Finance Clients](docs/clients.md) for an overview.
 
 ## Forking and Attribution
 
@@ -98,9 +98,9 @@ For further instructions, see guides below.
 
 ### Setup Guides
 
-- [Mac dev setup](https://github.com/we-promise/sure/wiki/Mac-Dev-Setup-Guide)
-- [Linux dev setup](https://github.com/we-promise/sure/wiki/Linux-Dev-Setup-Guide)
-- [Windows dev setup](https://github.com/we-promise/sure/wiki/Windows-Dev-Setup-Guide)
+- [Mac dev setup](https://github.com/SujaltheBIGG/finance-tracker/wiki/Mac-Dev-Setup-Guide)
+- [Linux dev setup](https://github.com/SujaltheBIGG/finance-tracker/wiki/Linux-Dev-Setup-Guide)
+- [Windows dev setup](https://github.com/SujaltheBIGG/finance-tracker/wiki/Windows-Dev-Setup-Guide)
 - Dev containers - visit [this guide](https://code.visualstudio.com/docs/devcontainers/containers)
 
 ### One-click Install
@@ -111,14 +111,14 @@ For further instructions, see guides below.
 
 [![Deploy on Hostim](https://hostim.dev/img/deploy-button.svg)](https://console.hostim.dev/dashboard?preview=1&modal=1&template=sure)
 
-### Managed OpenClaw for Sure Finances
+### Managed OpenClaw for Founder Finance Finances
 
-<a href="https://kilocode.pxf.io/repo-readme"><img src="https://kilo.ai/kiloclaw/partner-resources/kiloclaw-logo-yellow-bg-typography.png" alt="Managed OpenClaw for Sure Finances" width="185"/></a>
+<a href="https://kilocode.pxf.io/repo-readme"><img src="https://kilo.ai/kiloclaw/partner-resources/kiloclaw-logo-yellow-bg-typography.png" alt="Managed OpenClaw for Founder Finance Finances" width="185"/></a>
 
 
 ## License and Trademarks
 
-Maybe and Sure are both distributed under
-an [AGPLv3 license](https://github.com/we-promise/sure/blob/main/LICENSE).
+Maybe and Founder Finance are both distributed under
+an [AGPLv3 license](https://github.com/SujaltheBIGG/finance-tracker/blob/main/LICENSE).
 - "Maybe" is a trademark of Maybe Finance, Inc.
-- "Sure" is not, and refers to this community fork.
+- "Founder Finance" is not, and refers to this community fork.

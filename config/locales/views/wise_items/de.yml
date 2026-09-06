@@ -59,7 +59,7 @@ de:
         message: Richte die Active-Record-Verschlüsselungsschlüssel ein, bevor du im Produktivbetrieb Wise-Tokens hinterlegst. Ohne Verschlüsselung liegen die Tokens im Klartext.
         title: Datenbankverschlüsselung ist nicht eingerichtet
       instructions:
-        copy_token_html: Kopier den Token und füg ihn unten ein. Sure nutzt ihn ausschließlich, um deine Guthaben und Transaktionen abzugleichen.
+        copy_token_html: Kopier den Token und füg ihn unten ein. Founder Finance nutzt ihn ausschließlich, um deine Guthaben und Transaktionen abzugleichen.
         create_token: Leg einen neuen persönlichen API-Token mit reinem Lesezugriff an
         open_tokens: Gehe zu Settings → Connect and manage apps → Developer tools → API tokens
         sign_in_html: Öffne %{link} und melde dich in deinem Konto an
@@ -80,7 +80,7 @@ de:
       cancel: Abbrechen
       description: Wähl das Wise-Währungsguthaben, das du mit deinem %{product_name}-Konto verknüpfen willst.
       link_account: Guthaben verknüpfen
-      no_accounts_found: Alle Wise-Guthaben sind bereits mit Sure-Konten verknüpft.
+      no_accounts_found: Alle Wise-Guthaben sind bereits mit Founder Finance-Konten verknüpft.
       no_connection: Keine Wise-Verbindung gefunden. Verbinde Wise zuerst in den Anbietereinstellungen.
       title: Wise-Guthaben wählen
     select_existing_account:
@@ -94,15 +94,15 @@ de:
       already_connected_label: Bereits verbunden
       cancel: Abbrechen
       connect: Gewählte Profile verbinden
-      description: Dein Wise-Konto hat mehrere Profile. Wähl die aus, die du mit Sure abgleichen willst.
+      description: Dein Wise-Konto hat mehrere Profile. Wähl die aus, die du mit Founder Finance abgleichen willst.
       session_expired: Sitzung abgelaufen. Versuch die Verbindung noch einmal.
       subtitle: Wähl, welche Profile verbunden werden sollen
       title: Wise-Profile wählen
       unnamed_profile: "(Profil ohne Namen)"
     setup_accounts:
-      all_accounts_linked: Alle deine Wise-Währungsguthaben sind mit Sure-Konten verknüpft.
+      all_accounts_linked: Alle deine Wise-Währungsguthaben sind mit Founder Finance-Konten verknüpft.
       create_account: Konto anlegen
-      description: Leg für jedes Wise-Währungsguthaben, das du verfolgen willst, ein Sure-Konto an. Jede Währung wird ein eigenes Konto.
+      description: Leg für jedes Wise-Währungsguthaben, das du verfolgen willst, ein Founder Finance-Konto an. Jede Währung wird ein eigenes Konto.
       done: Fertig
       no_accounts_to_setup: Alle Konten sind eingerichtet
       subtitle: Verknüpf deine Wise-Währungsguthaben
@@ -144,10 +144,10 @@ de:
       delete: Trennen
       deletion_in_progress: wird gelöscht …
       error: Sync-Fehler
-      no_accounts_description: Starte einen Sync, um deine Wise-Guthaben zu finden, und verknüpf sie dann mit Sure-Konten.
+      no_accounts_description: Starte einen Sync, um deine Wise-Guthaben zu finden, und verknüpf sie dann mit Founder Finance-Konten.
       no_accounts_title: Noch keine Konten verknüpft
       setup_action: Konten einrichten
-      setup_description: "%{linked} von %{total} Konten verknüpft. Leg Sure-Konten für deine Wise-Währungsguthaben an."
+      setup_description: "%{linked} von %{total} Konten verknüpft. Leg Founder Finance-Konten für deine Wise-Währungsguthaben an."
       setup_needed: Neue Konten bereit zum Einrichten
       status: Synchronisiert vor %{timestamp}
       status_never: Noch nie synchronisiert

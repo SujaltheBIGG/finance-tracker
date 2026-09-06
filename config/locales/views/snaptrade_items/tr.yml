@@ -45,7 +45,7 @@ tr:
       oauth_connect_button: SnapTrade ile bağlan
       oauth_reauthorize_button: Yeniden yetkilendir
       oauth_status_authorized: SnapTrade ile yetkilendirildi.
-      oauth_status_ready: Sure'i SnapTrade için yetkilendirmek üzere bir cihaz kodu
+      oauth_status_ready: Founder Finance'i SnapTrade için yetkilendirmek üzere bir cihaz kodu
         kullanın.
       oauth_title: SnapTrade OAuth
       orphaned_connection: Yetim bağlantı (yerel olarak senkronize edilmedi)
@@ -153,7 +153,7 @@ tr:
         tekrar deneyin.
       open_snaptrade: SnapTrade'i aç
       start_button: Yetkilendirmeyi başlat
-      subtitle: Sure'i SnapTrade için yetkilendir
+      subtitle: Founder Finance'i SnapTrade için yetkilendir
       title: SnapTrade'e Bağlan
     preload_accounts:
       not_configured: SnapTrade yapılandırılmamış.
@@ -223,7 +223,7 @@ tr:
       requires_update: Bağlantının güncellenmesi gerekiyor
       setup_accounts_menu: Hesapları Kur
       setup_action: Hesapları Kur
-      setup_description: SnapTrade'den bazı hesapların Sure hesaplarıyla bağlanması
+      setup_description: SnapTrade'den bazı hesapların Founder Finance hesaplarıyla bağlanması
         gerekiyor.
       setup_needed: Hesapların kurulması gerekiyor
       status: 'Son senkronizasyon: %{timestamp} önce - %{summary}'

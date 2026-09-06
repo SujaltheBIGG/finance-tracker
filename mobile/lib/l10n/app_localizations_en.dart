@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Sure Finances';
+  String get appTitle => 'Founder Finance Finances';
 
   @override
   String get commonCancel => 'Cancel';
@@ -461,16 +461,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backendConfigTitle => 'Configuration';
 
   @override
-  String get backendConfigSubtitle => 'Update your Sure server URL';
+  String get backendConfigSubtitle => 'Update your Founder Finance server URL';
 
   @override
   String get backendConfigExampleUrlsLabel => 'Example URLs';
 
   @override
-  String get backendConfigUrlLabel => 'Sure server URL';
+  String get backendConfigUrlLabel => 'Founder Finance server URL';
 
   @override
-  String get backendConfigUrlHint => 'https://app.sure.am';
+  String get backendConfigUrlHint => 'https://founder-finance.example.com';
 
   @override
   String get backendConfigProxyHeadersLabel => 'Custom proxy headers';
@@ -770,7 +770,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginOrDivider => 'or';
 
   @override
-  String get loginServerUrlHeading => 'Sure server URL:';
+  String get loginServerUrlHeading => 'Founder Finance server URL:';
 
   @override
   String get loginApiKeyLoginButton => 'API-Key Login';
@@ -978,7 +978,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String backendConfigServerError(int code) {
-    return 'Server responded with status $code. Please check if this is a Sure backend server.';
+    return 'Server responded with status $code. Please check if this is a Founder Finance backend server.';
   }
 
   @override

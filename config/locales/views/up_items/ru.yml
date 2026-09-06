@@ -98,7 +98,7 @@ ru:
       fetch_failed: Could not fetch accounts
       no_accounts_to_setup: No accounts to set up
       no_credentials: Configure Up credentials first.
-      subtitle: Choose how each Up account should appear in Sure.
+      subtitle: Choose how each Up account should appear in Founder Finance.
       title: Link Up Accounts
     up_item:
       delete: Delete

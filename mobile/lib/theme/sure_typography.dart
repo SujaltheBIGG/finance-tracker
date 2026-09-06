@@ -1,4 +1,4 @@
-/// Sure type scale.
+/// Founder Finance type scale.
 ///
 /// Mirrors the Tailwind font-size defaults the web design system uses. Like
 /// [SureSpacing], this is hand-authored rather than generated from

@@ -95,7 +95,7 @@ pl:
       akahu_account_already_linked: To konto Akahu jest już połączone.
     setup_accounts:
       title: Konfiguruj konta Akahu
-      subtitle: Wybierz, jak każde konto Akahu ma być wyświetlane w Sure.
+      subtitle: Wybierz, jak każde konto Akahu ma być wyświetlane w Founder Finance.
       no_credentials: Najpierw skonfiguruj dane uwierzytelniające Akahu.
       api_error: Nie można pobrać kont Akahu.
       fetch_failed: Nie można pobrać kont

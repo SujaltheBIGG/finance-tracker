@@ -17,7 +17,7 @@ void main() {
             '"cash_balance_cents":20000,"currency":"USD",'
             '"classification":"asset","account_type":"investment",'
             '"subtype":"brokerage","status":"active",'
-            '"institution_name":"Sure Bank",'
+            '"institution_name":"Founder Finance Bank",'
             '"institution_domain":"sure.local",'
             '"created_at":"2026-06-01T00:00:00Z",'
             '"updated_at":"2026-06-02T00:00:00Z"}',
@@ -33,7 +33,7 @@ void main() {
 
       expect(result['success'], true);
       expect(result['account'].cashBalance, r'$200.00');
-      expect(result['account'].institutionName, 'Sure Bank');
+      expect(result['account'].institutionName, 'Founder Finance Bank');
     });
 
     test('returns unauthorized for account detail 401 responses', () async {
@@ -217,7 +217,7 @@ void main() {
             '{"holdings":[{"id":"holding_1","date":"2026-06-01",'
             '"qty":"4.0","price":"\$10.00","amount":"\$40.00",'
             '"currency":"USD","security":{"ticker":"SURE",'
-            '"name":"Sure Inc."}}],'
+            '"name":"Founder Finance Inc."}}],'
             '"pagination":{"page":1,"per_page":100,"total_count":1,'
             '"total_pages":1}}',
             200,

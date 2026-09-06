@@ -2,17 +2,17 @@
 ru:
   goal_pledges:
     create:
-      success: Pledge recorded. Sure will confirm it on the next sync.
+      success: Pledge recorded. Founder Finance will confirm it on the next sync.
     destroy:
       not_open: Only open pledges can be cancelled.
       success: Pledge cancelled.
     new:
       account_label: Into account
       amount_label: Amount
-      helper_manual: Sure will record this on your next manual balance edit and confirm
+      helper_manual: Founder Finance will record this on your next manual balance edit and confirm
         the contribution.
-      helper_transfer: Sure will look for a matching deposit in your linked account.
-        The pledge stays pending for 7 days, then auto-confirms once Sure spots it.
+      helper_transfer: Founder Finance will look for a matching deposit in your linked account.
+        The pledge stays pending for 7 days, then auto-confirms once Founder Finance spots it.
       preview_nonzero: Reaches {percent}%, {newTotal} of {target}.
       preview_reached: Hits your {target} target. Goal reached.
       preview_zero: Currently {current} of {target} saved.

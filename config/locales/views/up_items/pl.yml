@@ -86,7 +86,7 @@ pl:
       no_account_selected: Wybierz konto Up do połączenia.
     setup_accounts:
       title: Połącz konta Up
-      subtitle: Wybierz, jak każde konto Up ma być wyświetlane w Sure.
+      subtitle: Wybierz, jak każde konto Up ma być wyświetlane w Founder Finance.
       no_credentials: Najpierw skonfiguruj dane uwierzytelniające Up.
       api_error: Nie można pobrać kont Up.
       fetch_failed: Nie można pobrać kont

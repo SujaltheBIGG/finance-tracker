@@ -3,7 +3,7 @@
   detects a likely card-replacement pair (old card + new card, same
   institution, same type). "Relink" reuses the existing link_existing_account
   controller action to atomically swap the AccountProvider on the linked
-  Sure account. "Dismiss" persists a per-(dormant_sfa_id) dismissal on the
+  Founder Finance account. "Dismiss" persists a per-(dormant_sfa_id) dismissal on the
   latest sync's sync_stats so the banner stops showing for that pair.
   Suggestions are also auto-suppressed once the relink has already landed. %>
 <% latest_sync = simplefin_item.syncs.order(created_at: :desc).first %>

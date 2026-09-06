@@ -1,7 +1,7 @@
 const CACHE_VERSION = 'v1';
 const OFFLINE_ASSETS = [
   '/offline.html',
-  '/logo-offline.svg'
+  '/logo-pwa.png'
 ];
 
 // Install event - cache the offline page and assets

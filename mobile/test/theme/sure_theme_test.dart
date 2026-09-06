@@ -6,7 +6,7 @@ import 'package:sure_mobile/theme/sure_theme.dart';
 import 'package:sure_mobile/theme/sure_tokens.dart';
 
 void main() {
-  test('light theme uses Sure token values', () {
+  test('light theme uses Founder Finance token values', () {
     final theme = SureTheme.light;
 
     expect(theme.brightness, Brightness.light);
@@ -38,7 +38,7 @@ void main() {
     );
   });
 
-  test('dark theme uses Sure token values', () {
+  test('dark theme uses Founder Finance token values', () {
     final theme = SureTheme.dark;
 
     expect(theme.brightness, Brightness.dark);
@@ -68,7 +68,7 @@ void main() {
     );
   });
 
-  testWidgets('app wires Sure light and dark themes', (tester) async {
+  testWidgets('app wires Founder Finance light and dark themes', (tester) async {
     SharedPreferences.setMockInitialValues({});
 
     await tester.pumpWidget(const SureApp());

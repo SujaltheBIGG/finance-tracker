@@ -1,6 +1,6 @@
 name: Desktop Build
 
-# Build the macOS desktop app as part of the normal Sure release. The caller
+# Build the macOS desktop app as part of the normal Founder Finance release. The caller
 # supplies the v* release ref, so desktop versions cannot diverge independently.
 on:
   workflow_call:

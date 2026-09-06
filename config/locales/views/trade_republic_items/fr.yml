@@ -19,7 +19,7 @@ fr:
       setup_accounts: "Configurer les comptes"
       delete: "Supprimer"
       accounts_need_setup: "Compte à configurer"
-      accounts_need_setup_description: "Votre compte Trade Republic doit être lié à un compte Sure."
+      accounts_need_setup_description: "Votre compte Trade Republic doit être lié à un compte Founder Finance."
       no_accounts_discovered: "Aucun compte Trade Republic découvert pour le moment."
       no_accounts_discovered_description: "Terminez la connexion et lancez une synchronisation pour découvrir votre compte."
       data_quality:

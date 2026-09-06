@@ -12,14 +12,14 @@ it:
       not_authorized: "L'introduzione è disponibile solo per gli utenti ospite."
       welcome: "Benvenuto!"
       coming_soon: Esperienza di introduzione in arrivo
-      description: "Stiamo costruendo un percorso di onboarding più ricco per conoscere i tuoi obiettivi, traguardi e necessità quotidiane. Per ora, vai alla barra laterale della chat per iniziare una conversazione con Sure e raccontaci dove sei nel tuo percorso finanziario."
+      description: "Stiamo costruendo un percorso di onboarding più ricco per conoscere i tuoi obiettivi, traguardi e necessità quotidiane. Per ora, vai alla barra laterale della chat per iniziare una conversazione con Founder Finance e raccontaci dove sei nel tuo percorso finanziario."
       start_chatting: Inizia a chattare
     redis_configuration_error:
-      page_title: Configurazione Redis Richiesta - Sure
+      page_title: Configurazione Redis Richiesta - Founder Finance
       heading: Configurazione Redis Richiesta
-      subheading: La tua installazione self-hosted di Sure ha bisogno che Redis sia correttamente configurato.
+      subheading: La tua installazione self-hosted di Founder Finance ha bisogno che Redis sia correttamente configurato.
       why_required_title: Perché Redis è richiesto?
-      why_required_body: Sure usa Redis per gestire i job in background di Sidekiq per attività come la sincronizzazione dei dati dei conti, l'elaborazione delle importazioni e altre operazioni in background che mantengono aggiornati i tuoi dati finanziari.
+      why_required_body: Founder Finance usa Redis per gestire i job in background di Sidekiq per attività come la sincronizzazione dei dati dei conti, l'elaborazione delle importazioni e altre operazioni in background che mantengono aggiornati i tuoi dati finanziari.
       view_setup_guide: Visualizza guida alla configurazione
       setup_guide_hint: Segui la nostra guida Docker completa per configurare Redis
       refresh_hint: "Una volta configurato Redis, aggiorna questa pagina per continuare."
@@ -28,7 +28,7 @@ it:
       title: Novità
     release_notes_unavailable:
       name: Note di rilascio non disponibili
-      body_html: "<p>Impossibile recuperare le ultime note di rilascio al momento. Riprova più tardi o visita direttamente la nostra <a href='https://github.com/we-promise/sure/releases' target='_blank' rel='noopener noreferrer'>pagina rilasci su GitHub</a>.</p>"
+      body_html: "<p>Impossibile recuperare le ultime note di rilascio al momento. Riprova più tardi o visita direttamente la nostra <a href='https://github.com/SujaltheBIGG/finance-tracker/releases' target='_blank' rel='noopener noreferrer'>pagina rilasci su GitHub</a>.</p>"
     privacy:
       title: Informativa sulla privacy
       heading: Informativa sulla privacy

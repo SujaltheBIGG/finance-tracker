@@ -113,7 +113,7 @@ ru:
       fetch_failed: Could not fetch accounts
       no_accounts_to_setup: No accounts to set up
       no_credentials: Configure Akahu credentials first.
-      subtitle: Choose how each Akahu account should appear in Sure.
+      subtitle: Choose how each Akahu account should appear in Founder Finance.
       title: Set Up Akahu Accounts
     update:
       success: Akahu connection updated.

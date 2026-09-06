@@ -21,7 +21,7 @@ de:
       setup_accounts: "Konten einrichten"
       delete: "Löschen"
       accounts_need_setup: "Konto muss eingerichtet werden"
-      accounts_need_setup_description: "Dein Trade-Republic-Konto muss mit einem Sure-Konto verknüpft werden."
+      accounts_need_setup_description: "Dein Trade-Republic-Konto muss mit einem Founder Finance-Konto verknüpft werden."
       no_accounts_discovered: "Noch kein Trade-Republic-Konto entdeckt."
       no_accounts_discovered_description: "Schließe die Anmeldung ab und starte einen Sync, um dein Konto zu entdecken."
       data_quality:

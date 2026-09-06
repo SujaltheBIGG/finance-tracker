@@ -31,7 +31,7 @@ fr:
         confirm_disconnect:
           body: Cela supprimera l'URL, le token et l'ID de l'agent enregistrés, et basculera vers l'assistant intégré. Vous pourrez vous reconnecter ultérieurement en saisissant de nouvelles informations d'identification.
           title: Déconnecter l'assistant externe ?
-        description: Choisissez comment l'assistant de discussion répond. Intégré utilise directement votre fournisseur LLM configuré. Externe délègue à un agent IA distant qui peut invoquer les outils financiers de Sure via MCP.
+        description: Choisissez comment l'assistant de discussion répond. Intégré utilise directement votre fournisseur LLM configuré. Externe délègue à un agent IA distant qui peut invoquer les outils financiers de Founder Finance via MCP.
         disconnect_button: Déconnecter
         disconnect_description: Supprimer la connexion à l'assistant externe et revenir à l'assistant intégré.
         disconnect_title: Connexion externe

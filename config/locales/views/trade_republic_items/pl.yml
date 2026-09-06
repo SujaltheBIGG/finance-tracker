@@ -19,7 +19,7 @@ pl:
       setup_accounts: "Skonfiguruj rachunki"
       delete: "Usuń"
       accounts_need_setup: "Rachunek wymaga konfiguracji"
-      accounts_need_setup_description: "Twój rachunek Trade Republic musi zostać połączony z rachunkiem Sure."
+      accounts_need_setup_description: "Twój rachunek Trade Republic musi zostać połączony z rachunkiem Founder Finance."
       no_accounts_discovered: "Nie wykryto jeszcze rachunku Trade Republic."
       no_accounts_discovered_description: "Zakończ logowanie i uruchom synchronizację, aby wykryć rachunek."
       data_quality:

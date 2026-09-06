@@ -4,7 +4,7 @@ import '../theme/sure_colors.dart';
 
 /// Directional meaning of a monetary value, used to pick its semantic color.
 /// This mirrors the app's existing in/out coloring (money in is positive, money
-/// out is negative) but routes it through Sure design-system tokens instead of
+/// out is negative) but routes it through Founder Finance design-system tokens instead of
 /// raw [Colors.green]/[Colors.red].
 enum MoneyTrend {
   /// Money coming in (positive change, income, a gain). Uses `success`.

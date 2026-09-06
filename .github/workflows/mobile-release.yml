@@ -305,7 +305,7 @@ jobs:
 
           if [ ! -f "$README" ]; then
             # No README yet — create one
-            printf "# Sure\n\n%s\n" "$SECTION" > "$README"
+            printf "# Founder Finance\n\n%s\n" "$SECTION" > "$README"
           elif grep -q '<!-- MOBILE_DOWNLOADS_START -->' "$README"; then
             # Replace existing mobile section between markers
             awk '

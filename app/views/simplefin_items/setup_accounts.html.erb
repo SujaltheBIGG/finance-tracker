@@ -63,7 +63,7 @@
              the neutral "no transactions imported yet" badge instead. %>
           <% likely_closed = activity.last_transacted_at.present? && activity.dormant? && near_zero_balance %>
           <%# Default likely-closed accounts (dormant AND near-zero balance) to "skip" so
-             users don't accidentally create empty Sure accounts for closed/replaced cards. %>
+             users don't accidentally create empty Founder Finance accounts for closed/replaced cards. %>
           <% selected_type = if likely_closed
             "skip"
           else
