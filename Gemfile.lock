@@ -307,7 +307,7 @@ GEM
     htmlbeautifier (1.4.3)
     htmlentities (4.3.4)
     http-2 (1.2.1)
-    httparty (0.24.0)
+    httparty (0.24.2)
       csv
       mini_mime (>= 1.0.0)
       multi_xml (>= 0.5.2)
