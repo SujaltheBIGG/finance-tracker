@@ -7,7 +7,8 @@ on:
 
 jobs:
   update-docs:
-    if: github.repository == 'SujaltheBIGG/finance-tracker'
+    # This inherited integration requires credentials owned by the upstream project.
+    if: github.repository == 'we-promise/sure'
     permissions: {}
     runs-on: ubuntu-latest
     steps:

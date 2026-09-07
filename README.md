@@ -1,124 +1,71 @@
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/SujaltheBIGG/finance-tracker)
-[![View performance data on Skylight](https://badges.skylight.io/typical/s6PEZSKwcklL.svg)](https://oss.skylight.io/app/applications/s6PEZSKwcklL)
-[![Dosu](https://raw.githubusercontent.com/dosu-ai/assets/main/dosu-badge.svg)](https://app.dosu.dev/a72bdcfd-15f5-4edc-bd85-ea0daa6c3adc/ask)
-[![Pipelock Security Scan](https://github.com/SujaltheBIGG/finance-tracker/actions/workflows/pipelock.yml/badge.svg)](https://github.com/SujaltheBIGG/finance-tracker/actions/workflows/pipelock.yml)
-
-<img width="1270" height="1140" alt="founder_finance_shot" src="https://github.com/user-attachments/assets/9c6e03cc-3490-40ab-9a68-52e042c51293" />
-
 <p align="center">
-  <!-- Keep these links. Translations will automatically update with the README. -->
-  <a href="https://readme-i18n.com/de/SujaltheBIGG/finance-tracker">Deutsch</a> |
-  <a href="https://readme-i18n.com/es/SujaltheBIGG/finance-tracker">Español</a> |
-  <a href="https://readme-i18n.com/fr/SujaltheBIGG/finance-tracker">Français</a> |
-  <a href="https://readme-i18n.com/ja/SujaltheBIGG/finance-tracker">日本語</a> |
-  <a href="https://readme-i18n.com/ko/SujaltheBIGG/finance-tracker">한국어</a> |
-  <a href="https://readme-i18n.com/pt/SujaltheBIGG/finance-tracker">Português</a> |
-  <a href="https://readme-i18n.com/ru/SujaltheBIGG/finance-tracker">Русский</a> |
-  <a href="https://readme-i18n.com/zh/SujaltheBIGG/finance-tracker">中文</a>
+  <img src="app/assets/images/founder-finance-logo.png" alt="Founder Finance" width="180">
 </p>
 
-# Founder Finance: The personal finance app for everyone
+# Founder Finance
 
-<b>Get
-involved: [Discord](https://discord.gg/36ZGBsxYEK) • [Website](https://github.com/SujaltheBIGG/finance-tracker) • [Issues](https://github.com/SujaltheBIGG/finance-tracker/issues)</b>
+Founder Finance is a self-hosted personal finance application for tracking accounts, transactions, budgets, investments, and net worth from one dashboard.
 
-> [!IMPORTANT]
-> This repository is a community fork of the now-abandoned Maybe Finance project. <br />
-> Learn more in their [final release](https://github.com/maybe-finance/maybe/releases/tag/v0.6.0) doc.
+## Features
 
-## Backstory
+- Account and balance tracking
+- Transaction importing and categorization
+- Budgets, recurring transactions, and financial goals
+- Investment and cryptocurrency tracking
+- Browser, desktop, mobile, and API clients
+- Optional AI-powered financial insights
 
-The [Maybe Finance](https://github.com/maybe-finance/maybe) (archived/abandoned repo) team spent most of 2021–2022 building a full-featured personal finance and wealth management app. It even included an “Ask an Advisor” feature that connected users with a real CFP/CFA — all included with your subscription.
-
-The business end of things didn't work out, and so they stopped developing the app in mid-2023.
-
-After spending nearly $1 million on development (employees, contractors, data providers, infra, etc.), the team open-sourced the app. Their goal was to let users self-host it for free — and eventually launch a hosted version for a small fee.
-
-They actually did launch that hosted version … briefly.
-
-That also didn’t work out — at least not as a sustainable B2C business — so now here we are: hosting a community-maintained fork to keep the codebase alive and see where this can go next.
-
-Join us!
-
-## Hosting Founder Finance
-
-Founder Finance is a fully working personal finance app that can be [self hosted with Docker](docs/hosting/docker.md).
-Founder Finance can be accessed from a browser, the macOS desktop app, the mobile app, API
-clients, and LLM agents. See [Founder Finance Clients](docs/clients.md) for an overview.
-
-## Forking and Attribution
-
-This repo is a community fork of the archived Maybe Finance repo.
-You’re free to fork it under the AGPLv3 license — but we’d love it if you stuck around and contributed here instead.
-
-To stay compliant and avoid trademark issues:
-
-- Be sure to include the original [AGPLv3 license](https://github.com/maybe-finance/maybe/blob/main/LICENSE) and clearly state in your README that your fork is based on Maybe Finance but is **not affiliated with or endorsed by** Maybe Finance Inc.
-- "Maybe" is a trademark of Maybe Finance Inc. and therefore, use of it is NOT allowed in forked repositories (or the logo)
-
-## Performance Issues
-
-With data-heavy apps, inevitably, there are performance issues. We've set up a public dashboard showing the problematic requests seen on the demo site, along with the stacktraces to help debug them.
-
-[https://www.skylight.io/app/applications/s6PEZSKwcklL/recent/6h/endpoints](https://oss.skylight.io/app/applications/s6PEZSKwcklL/recent/6h/endpoints)
-
-Any contributions that help improve performance are very much welcome.
-
-## Local Development Setup
-
-**If you are trying to _self-host_ the app, [read this guide to get started](docs/hosting/docker.md).**
-
-The instructions below are for developers to get started with contributing to the app.
+## Run Locally
 
 ### Requirements
 
-- See `.ruby-version` file for required Ruby version
-- PostgreSQL >9.3 (latest stable version recommended)
-- Redis > 5.4 (latest stable version recommended)
+- Ruby version from `.ruby-version`
+- PostgreSQL
+- Redis
 
-### Getting Started
 ```sh
-cd sure
 cp .env.local.example .env.local
 bin/setup
 bin/dev
-
-# Optionally, load demo data
-rake demo_data:default
 ```
 
-Visit http://localhost:3000 to view the app.
+Open [http://localhost:3000](http://localhost:3000).
 
-If you loaded the optional demo data, log in with these credentials:
+To load the included sample dataset:
 
-- Email: `user@example.com`
-- Password: `Password1!`
+```sh
+bin/rails demo_data:default
+```
 
-For further instructions, see guides below.
+## Production Deployment
 
-### Setup Guides
+The repository includes a production `Dockerfile`. A deployment needs:
 
-- [Mac dev setup](https://github.com/SujaltheBIGG/finance-tracker/wiki/Mac-Dev-Setup-Guide)
-- [Linux dev setup](https://github.com/SujaltheBIGG/finance-tracker/wiki/Linux-Dev-Setup-Guide)
-- [Windows dev setup](https://github.com/SujaltheBIGG/finance-tracker/wiki/Windows-Dev-Setup-Guide)
-- Dev containers - visit [this guide](https://code.visualstudio.com/docs/devcontainers/containers)
+- A PostgreSQL database exposed through `DATABASE_URL`
+- A Redis instance exposed through `REDIS_URL`
+- `SECRET_KEY_BASE` set to a securely generated value
+- `SELF_HOSTED=true`
+- `RAILS_FORCE_SSL=true` and `RAILS_ASSUME_SSL=true` behind an HTTPS proxy
 
-### One-click Install
+The container runs database preparation automatically before starting Rails. Its health endpoint is `/up`.
 
-[![Run on PikaPods](https://www.pikapods.com/static/run-button.svg)](https://www.pikapods.com/pods?run=sure)
+For a Docker Compose installation, see [the hosting guide](docs/hosting/docker.md).
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/sure?referralCode=CW_fPQ)
+## Development
 
-[![Deploy on Hostim](https://hostim.dev/img/deploy-button.svg)](https://console.hostim.dev/dashboard?preview=1&modal=1&template=sure)
+Run the automated checks with:
 
-### Managed OpenClaw for Founder Finance Finances
+```sh
+bin/rails test
+bin/rails test:system
+```
 
-<a href="https://kilocode.pxf.io/repo-readme"><img src="https://kilo.ai/kiloclaw/partner-resources/kiloclaw-logo-yellow-bg-typography.png" alt="Managed OpenClaw for Founder Finance Finances" width="185"/></a>
+Issues and feature requests can be submitted in the [GitHub repository](https://github.com/SujaltheBIGG/finance-tracker/issues).
 
+## Attribution
 
-## License and Trademarks
+Founder Finance is based on the open-source Maybe Finance codebase and is not affiliated with or endorsed by Maybe Finance, Inc.
 
-Maybe and Founder Finance are both distributed under
-an [AGPLv3 license](https://github.com/SujaltheBIGG/finance-tracker/blob/main/LICENSE).
-- "Maybe" is a trademark of Maybe Finance, Inc.
-- "Founder Finance" is not, and refers to this community fork.
+## License
+
+Founder Finance is distributed under the [GNU Affero General Public License v3.0](LICENSE).
