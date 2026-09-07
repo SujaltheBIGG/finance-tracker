@@ -37,7 +37,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  # OCI image references must be lowercase even when the GitHub owner is not.
+  IMAGE_NAME: sujalthebigg/finance-tracker
 
 permissions:
   contents: write
