@@ -93,3 +93,7 @@
 
   <%= form.submit t(".submit") %>
 <% end %>
+
+<%= render "shared/sso_provider_buttons",
+           providers: AuthConfig.google_oauth_providers,
+           google_label: t(".google_auth_connect", default: "Continue with Google") %>

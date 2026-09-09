@@ -29,7 +29,9 @@ class PagesController < ApplicationController
   DASHBOARD_HEIGHT_PRESETS = { "compact" => 208, "auto" => 288, "tall" => 416 }.freeze
   DEFAULT_HEIGHT_PRESET = "auto"
 
+  skip_before_action :authenticate_user!, only: :dashboard
   skip_authentication only: %i[redis_configuration_error privacy terms]
+  prepend_before_action :serve_landing_to_guest, only: :dashboard
   before_action :ensure_intro_guest!, only: :intro
 
   def dashboard
@@ -117,6 +119,20 @@ class PagesController < ApplicationController
   end
 
   private
+    def serve_landing_to_guest
+      had_session_cookie = cookies.signed[:session_token].present?
+
+      if session_record = find_session_by_cookie
+        Current.session = session_record
+      elsif had_session_cookie
+        redirect_to new_session_path
+      else
+        send_file Rails.root.join("public/landing/index.html"),
+                  type: "text/html; charset=utf-8",
+                  disposition: "inline"
+      end
+    end
+
     def preferences_params
       prefs = params.require(:preferences)
       {}.tap do |permitted|

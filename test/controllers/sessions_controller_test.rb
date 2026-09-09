@@ -134,26 +134,23 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Local password login is disabled. Please use single sign-on.", flash[:alert]
   end
 
-  test "renders multiple SSO provider buttons" do
+  test "renders only the Google OAuth provider button" do
     AuthConfig.stubs(:local_login_form_visible?).returns(true)
     AuthConfig.stubs(:password_features_enabled?).returns(true)
-    AuthConfig.stubs(:sso_providers).returns([
-      { id: "oidc", strategy: "openid_connect", name: "openid_connect", label: "Sign in with Keycloak", icon: "key" },
+    AuthConfig.stubs(:google_oauth_providers).returns([
       { id: "google", strategy: "google_oauth2", name: "google_oauth2", label: "Sign in with Google", icon: "google" }
     ])
 
     get new_session_path
     assert_response :success
 
-    # Generic OIDC button
-    assert_match %r{/auth/openid_connect}, @response.body
-    assert_match /Sign in with Keycloak/, @response.body
-
     # Google-branded button — DS outline button carrying Google's official
     # multi-color "G" mark (one of its brand hexes proves the inline SVG rendered).
     assert_match %r{/auth/google_oauth2}, @response.body
     assert_match /#4285F4/i, @response.body
     assert_match /Sign in with Google/, @response.body
+    assert_no_match %r{/auth/openid_connect}, @response.body
+    assert_no_match %r{/auth/github}, @response.body
   end
 
   test "can sign out" do

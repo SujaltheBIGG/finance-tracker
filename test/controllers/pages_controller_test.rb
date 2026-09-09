@@ -14,6 +14,18 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert_response :ok
   end
 
+  test "root serves the Founder Finance landing page without a session" do
+    reset!
+
+    get root_path
+
+    assert_response :ok
+    assert_equal "text/html", response.media_type
+    assert_includes response.body, "<title>Founder Finance: The personal finance app for everyone</title>"
+    assert_includes response.body, "'try':APP, 'sample':'/registration/new'"
+    assert_includes response.body, "const APP  = '/sessions/new'"
+  end
+
   test "inactive user's existing session is revoked" do
     session_record = @user.sessions.order(:created_at).last
     @user.update_column(:active, false)

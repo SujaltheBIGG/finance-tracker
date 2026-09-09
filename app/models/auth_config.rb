@@ -93,5 +93,12 @@ class AuthConfig
         Rails.configuration.x.auth.sso_providers || []
       end
     end
+
+    def google_oauth_providers
+      sso_providers.select do |provider|
+        provider = provider.with_indifferent_access
+        provider[:id] == "google" || provider[:strategy] == "google_oauth2"
+      end
+    end
   end
 end

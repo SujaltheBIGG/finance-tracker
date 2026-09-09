@@ -1,0 +1,2817 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+  ============================================================================
+  Founder Finance — WebGL / three.js landing page
+  Single-file build. No React, no bundler, no framework.
+  Everything below the asset layer (geometry, materials, shaders, layout,
+  typography rasterisation, charts, glows, shadows) is generated in code.
+
+  ##TOC  — grep any marker below to jump straight to a section.
+    ##CSS            page shell styling (scroll spacer + canvas + loader)
+    ##DOM            body markup
+    ##S00-TOKENS     palette, metrics, copy, asset manifest
+    ##S01-UTIL       math, easing, rounded-rect geometry, uv remap
+    ##S02-TYPE       canvas typography + rich-run layout engine
+    ##S03-TEX        texture factory (text, shadow, grain, gradients)
+    ##S04-MAT        material library + custom shaders
+    ##S05-BUILD      mesh builders (plane, slab, card, pill, chart)
+    ##S06-STAGE      renderer, camera, lights, scene graph
+    ##S07-NAV        fixed overlay: gradient strip + navigation
+    ##S08-HERO       hero: mark, headline, cta, chart backdrop, app shot
+    ##S09-ADD        "Add anything, yes anything"
+    ##S10-TXN        "Transactions handled your way"
+    ##S11-BUDGET     "Budgeting, made simple"
+    ##S12-TRUST      "Uncompromising Security / Radical Transparency"
+    ##S13-AI         dark AI slab + prompt marquee
+    ##S14-CTA        "Turn your maybe, into a sure thing"
+    ##S15-FOOTER     footer columns + baseline
+    ##S16-SCROLL     scroll controller, reveal animation, parallax
+    ##S17-BOOT       resize, raf loop, start
+  ============================================================================
+-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<base href="/landing/">
+<title>Founder Finance: The personal finance app for everyone</title>
+<meta name="description" content="Founder Finance is an all-in-one personal finance platform. Track, optimize, grow, and manage your money through every stage of life.">
+<meta name="theme-color" content="#F5F5F5">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23F5F5F5'/%3E%3Crect x='5' y='6' width='22' height='8' rx='1' fill='%23737373'/%3E%3Crect x='5' y='18' width='22' height='8' rx='1' fill='%2354983B'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400;500&family=Archivo+Black&display=swap" rel="stylesheet">
+<style>
+  /* ##LOGO FACE — Peace Sans is not served by any font CDN and is not a system
+     face, so it has to ship with the project. Drop the file in as
+     Assets/PeaceSans.woff2 (or .otf) and the logotype picks it up on the next
+     load; until then it falls back to Archivo Black and the mark still sets. */
+  @font-face{
+    font-family:"Peace Sans";
+    src:url("Assets/PeaceSans.woff2") format("woff2"),
+        url("Assets/PeaceSans.otf")   format("opentype");
+    font-weight:400; font-style:normal; font-display:block;
+  }
+</style>
+
+<!-- ##CSS ==================================================================
+     The DOM does almost nothing: it owns a tall spacer that produces a real
+     native scrollbar, and a fixed canvas that the whole page is drawn into.
+     ====================================================================== -->
+<style>
+  :root{
+    --bg:#F5F5F5; --ink:#343434; --muted:#737373; --faint:#979797;
+    --font:"Geist",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+    --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:var(--bg)}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--font);
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  /* the canvas never scrolls — the camera does */
+  #gl{position:fixed; inset:0; width:100vw; height:100vh; display:block; z-index:1;
+      touch-action:pan-y}
+  /* pure height. gives us a native scrollbar, keyboard paging, trackpad inertia */
+  #space{position:relative; width:100%; z-index:0; pointer-events:none}
+
+  /* ---- loader ---------------------------------------------------------- */
+  #boot{position:fixed; inset:0; z-index:10; background:var(--bg);
+        display:flex; align-items:center; justify-content:center; flex-direction:column;
+        gap:18px; transition:opacity .6s ease; }
+  #boot.gone{opacity:0; pointer-events:none}
+  #boot .bar{width:180px;height:2px;background:#E4E4E4;border-radius:2px;overflow:hidden}
+  #boot .bar i{display:block;height:100%;width:0%;border-radius:2px;
+    background:linear-gradient(90deg,#FFC552,#EEAC43,#DB840B,#F15B29); transition:width .25s ease}
+  #boot .lbl{font:400 12px/1 var(--mono); letter-spacing:.08em; color:var(--faint);
+    text-transform:uppercase}
+
+  /* ---- hard-failure notice (file:// or no WebGL) ----------------------- */
+  #warn{position:fixed;inset:0;z-index:20;background:var(--bg);display:none;
+        align-items:center;justify-content:center;padding:32px}
+  #warn.on{display:flex}
+  #warn .box{max-width:560px}
+  #warn h2{font:600 22px/1.3 var(--font);color:var(--ink);margin-bottom:10px}
+  #warn p{font:400 15px/1.6 var(--font);color:var(--muted);margin-bottom:14px}
+  #warn code{display:block;font:400 13px/1.8 var(--mono);background:#111;color:#F5F5F5;
+    padding:12px 16px;border-radius:10px;white-space:pre;overflow-x:auto}
+  /* screen-reader / no-JS content: the page still has real text for crawlers */
+  #seo{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  /* ##HITS — the interaction layer.
+     The page is drawn in WebGL, but a canvas cannot be a link: no href, no
+     middle-click, no keyboard focus, no screen reader. So every interactive
+     element registers a transparent <a> that is projected onto its own
+     geometry each frame. Real anchors, real semantics, WebGL pixels. */
+  #hits{position:fixed; inset:0; z-index:5; pointer-events:none}
+  #hits a.hit{position:absolute; display:block; pointer-events:auto; cursor:pointer;
+              background:transparent; border-radius:10px; outline-offset:3px;
+              -webkit-tap-highlight-color:transparent}
+  #hits a.hit:focus-visible{outline:2px solid #343434}
+
+  /* ##MOBILE SHEET — the compact nav's full-height menu */
+  #mmenu{position:fixed; left:0; right:0; bottom:0; z-index:6; display:none;
+         flex-direction:column; justify-content:space-between; gap:8px; padding:16px;
+         background:rgb(245 245 245 / .96); backdrop-filter:blur(16px);
+         border-top:1px solid #E4E4E4; border-bottom:1px solid #E4E4E4}
+  #mmenu.on{display:flex; animation:mm .22s ease-out}
+  @keyframes mm{from{opacity:0; transform:scale(.97)} to{opacity:1; transform:none}}
+  #mmenu .grp{display:grid; gap:8px}
+  #mmenu a{display:block; padding:10px 12px; border-radius:8px; text-decoration:none;
+           font:500 15px/1.2 var(--font); color:#343434;
+           transition:background-color .15s ease-in-out}
+  #mmenu a:hover{background:#EAEAEA}
+  #mmenu a.out{border:1px solid #E2E2E2; background:#FDFDFD; text-align:center}
+  #mmenu a.pri{background:#101010; color:#FDFDFD; text-align:center; border:0}
+  #mmenu .sep{font:600 10px/1 var(--mono); letter-spacing:.09em; color:#A3A3A3;
+              text-transform:uppercase; padding:12px 12px 2px}
+  #mmenu .scroll{overflow-y:auto; -webkit-overflow-scrolling:touch}
+
+  /* ##400 — a blocked-navigation notice for unavailable template links.
+     Every internal-looking link here (site pages, the app, and the docs)
+     is caught when its destination is unavailable,
+     so the click is caught and answered with a plain, generic HTTP error
+     instead of a redirect. GitHub and Discord are unrelated third parties and
+     are not affected — those still open for real. */
+  #err400{position:fixed; inset:0; z-index:100; display:none;
+          align-items:flex-start; justify-content:center; padding-top:14vh;
+          background:rgba(20,20,20,.55); backdrop-filter:blur(2px)}
+  #err400.on{display:flex; animation:e4 .15s ease-out}
+  @keyframes e4{from{opacity:0} to{opacity:1}}
+  #err400 .card{width:min(92vw,560px); background:#fff; color:#222;
+                border-radius:4px; box-shadow:0 20px 50px rgb(0 0 0/.35);
+                font-family:Georgia,'Times New Roman',serif; padding:26px 30px 22px}
+  #err400 h1{font-size:22px; font-weight:400; margin-bottom:14px}
+  #err400 p{font-size:15px; line-height:1.5; margin-bottom:4px}
+  #err400 p:last-child{margin-bottom:0}
+
+  /* ##DROPDOWN — mirrors the reference's hover menus: white card, rounded-xl,
+     shadow-lg, opacity + 8px lift over 300ms ease-in-out. */
+  .dd{position:absolute; pointer-events:auto; padding:8px; background:#fff;
+      border-radius:12px; box-shadow:0 10px 15px -3px rgb(0 0 0/.1), 0 4px 6px -4px rgb(0 0 0/.1);
+      opacity:0; visibility:hidden; transform:translateY(-8px);
+      transition:opacity .3s ease-in-out, transform .3s ease-in-out, visibility .3s ease-in-out}
+  .dd.on{opacity:1; visibility:visible; transform:translateY(0)}
+  .dd a{display:block; padding:10px 12px; border-radius:8px; text-decoration:none;
+        transition:background-color .15s ease-in-out}
+  .dd a:hover{background:#F5F5F5}
+  .dd .t{font:500 14px/1.35 var(--font); color:#343434}
+  .dd .d{font:400 13px/1.4 var(--font); color:#979797; margin-top:2px}
+  .dd .sep{font:600 10px/1 var(--mono); letter-spacing:.09em; color:#A3A3A3;
+           padding:10px 12px 6px; text-transform:uppercase}
+</style>
+</head>
+
+<!-- ##DOM ================================================================ -->
+<body>
+  <div id="space"></div>
+  <canvas id="gl"></canvas>
+
+  <div id="hits"></div>
+  <div id="mmenu" aria-hidden="true"></div>
+  <div id="err400" role="alertdialog" aria-modal="true" aria-labelledby="e4t">
+    <div class="card">
+      <h1 id="e4t">400 Bad Request</h1>
+      <p>Your browser sent a request that this server could not understand.</p>
+    </div>
+  </div>
+
+  <div id="boot"><div class="bar"><i></i></div><div class="lbl">loading</div></div>
+
+  <div id="warn"><div class="box">
+    <h2 id="warnTitle">Serve this folder over HTTP</h2>
+    <p id="warnBody">WebGL cannot read local image files through <code style="display:inline;padding:2px 6px">file://</code>,
+       so the textures are blocked. Run one of these from this folder, then open the printed address.</p>
+    <code>python3 -m http.server 8080
+# or
+npx serve .</code>
+  </div></div>
+
+  <h1 id="seo">Founder Finance — the personal finance app for everyone. Track, optimize,
+  grow, and manage your money through every stage of life.</h1>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+<script>
+"use strict";
+/* ##S00-TOKENS ==============================================================
+   Every colour here was sampled off the reference capture, not guessed.
+   Layout metrics are expressed in CSS pixels at a 1152px content column and
+   scaled from there, so one set of numbers drives every breakpoint.
+   ======================================================================== */
+const T = {
+  /* -- surfaces -- */
+  bg:        0xF5F5F5,   // page
+  bgAlt:     0xEFEFEF,   // trust band + footer
+  white:     0xFDFDFD,   // feature container + cards
+  panel:     0xF7F7F7,   // media well inside a card
+  dark:      0x191919,   // AI slab
+  darkDeep:  0x121212,
+  /* -- ink -- */
+  ink:       '#343434',
+  inkHard:   '#0B0B0B',  // wordmark
+  muted:     '#737373',
+  faint:     '#979797',
+  line:      '#E6E6E6',
+  onDark:    '#FDFDFD',
+  onDarkDim: '#8A8A8A',
+  /* -- brand -- */
+  green:     '#54983B',
+  greenHex:  0x54983B,
+  /* -- the amber ramp, straight out of border-strip.svg -- */
+  amber:  ['#FFC552','#EEAC43','#DB840B','#F15B29'],
+  amberN: [0xFFC552, 0xEEAC43, 0xDB840B, 0xF15B29],
+  /* -- type -- */
+  sans: '"Geist",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif',
+  mono: '"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace',
+  display: '"Archivo Black","Geist",system-ui,sans-serif',
+};
+
+/* world scale: 1 CSS pixel == U world units. Keeping the whole document in
+   pixel space means layout maths is ordinary layout maths; only the camera
+   distance converts. */
+const U = 0.01;
+const px = v => v * U;
+
+const M = {                 // metrics, CSS px @ 1152 column
+  colMax:   1152,
+  gutter:   24,
+  navH:     54,
+  stripH:   6,
+  cardGap:  20,
+  radCard:  16,
+  radPanel: 24,
+  radPill:  999,
+};
+
+/* ##ASSETS — short key -> file. Only bitmaps/vectors ship as files; every
+   other pixel on the page is generated. */
+const A = {
+  wordmark:  'Assets/logo-313d1266.svg',
+  github:    'Assets/badge-github-8f7edea1.svg',
+  discord:   'Assets/badge-discord-02531297.svg',
+  discordF:  'Assets/footer-discord-b5cd74ad.svg',
+  aiIcon:    'Assets/icon-maybe-color-64552140.svg',
+
+  heroShot:  'Assets/maybe-home-hero-693711d6.png',
+
+  addHead:   'Assets/home-add-anything-94120c1c.png',
+  addLink:   'Assets/home-add-anything-link-assets-bfe78201.png',
+  addChart:  'Assets/home-add-anything-charted-2a66f97c.png',
+  addManual: 'Assets/home-add-anything-manual-too-2d798dce.png',
+  icBank:    'Assets/home-add-anything-bank-accounts-781fdc2a.svg',
+  icStocks:  'Assets/home-add-anything-stocks-3befdc03.svg',
+  icCrypto:  'Assets/home-add-anything-crypto-0d8a6825.svg',
+  icAssets:  'Assets/home-add-anything-assets-762c5301.svg',
+  icCurr:    'Assets/home-add-anything-currency-51b795a3.svg',
+
+  txnHead:   'Assets/home-transactions-e1ba6f14.png',
+  txnTop:    'Assets/home-transactions-stay-on-top-6aa577b0.png',
+  txnFind:   'Assets/home-transactions-find-exact-d5975335.png',
+  txnAuto:   'Assets/home-transactions-automate-1a0d7e80.png',
+  icAdd:     'Assets/filled-add-a1bbc7fc.svg',
+  icSub:     'Assets/filled-subtract-ec48ec09.svg',
+  icFlow:    'Assets/filled-flow-644b5771.svg',
+  icPencil:  'Assets/filled-pencil-ac84d683.svg',
+  icBoard:   'Assets/filled-board-242f02d9.svg',
+  icShop:    'Assets/filled-shop-44d94f06.svg',
+  icTags:    'Assets/filled-tags-ff158deb.svg',
+  icFilter:  'Assets/filled-filter-ceab064d.svg',
+  icImport:  'Assets/filled-import-1f26d1d3.svg',
+  icLink:    'Assets/filled-link-3ba563bd.svg',
+  icRules:   'Assets/filled-customize-2f998cf2.svg',
+
+  budHead:   'Assets/home-budgeting-header-7568d204.png',
+  budSetup:  'Assets/home-budgeting-setup-e4c3de52.png',
+  budTrack:  'Assets/home-budgeting-track-spending-4e7537ce.png',
+  budOpt:    'Assets/home-budgeting-optimize-04e784e3.png',
+  icCustom:  'Assets/home-budgeting-customize-1b128221.svg',
+  icAlloc:   'Assets/home-budgeting-smart-alloc-2be66f4b.svg',
+  icCats:    'Assets/home-budgeting-categories-96923ea8.svg',
+
+  trSecure:  'Assets/home-transparency-secure-56fb2fd3.png',
+  trOpen:    'Assets/home-transparency-open-source-b37b782e.png',
+  trPublic:  'Assets/home-transparency-built-in-public-512b5ba6.png',
+
+  aiPanel:   'Assets/maybe-ai-03687d5c.png',
+  aiPrompt:  'Assets/assistant-dark-prompter-b0aa1dbb.svg',
+  aiPortf:   'Assets/ai-how-portfolio-f66e6a77.svg',
+  aiUnusual: 'Assets/ai-unusual-spend-e269d7e3.svg',
+  aiSim:     'Assets/ai-simulate-worth-aab0bea9.svg',
+  aiCompare: 'Assets/ai-compare-21562038.svg',
+  aiPattern: 'Assets/ai-find-patterns-e6beccb4.svg',
+  aiSumm:    'Assets/ai-summarize-ba23ce93.svg',
+  aiForecast:'Assets/ai-forecast-cd552ac1.svg',
+  aiAnalyze: 'Assets/ai-analyze-fd32e42f.svg',
+  aiSpent:   'Assets/ai-dark-spent-a3059784.png',
+  aiSpentBar:'Assets/ai-dark-spent-bar-89525a3f.png',
+  aiStocks:  'Assets/ai-dark-stocks-af0ecbdc.png',
+  aiStocksC: 'Assets/ai-dark-stocks-compare-60b52102.png',
+};
+
+/* ##HREF — every destination on the page, lifted verbatim from the reference
+   markup's anchors and keyed by the label that carries it. Relative paths are
+   resolved against the site origin; everything else is already absolute. */
+/* ##BRAND — the logotype. Set as a heavy geometric grotesque, lowercase and
+   tightly stacked, which is the treatment the supplied artwork uses. Archivo
+   Black carries it: single weight, tiny counters, flat terminals. */
+const BRAND = {
+  lines: ['founder','finance'],      // the stacked lockup
+  word:  'founder finance',          // the single-line wordmark, for bars
+  ink:   '#1C1C1C',
+  face:  '"Peace Sans","Archivo Black","Geist",system-ui,sans-serif',
+  /* Peace Sans sets wider and rounder than the fallback, so the lockup's
+     leading and tracking are keyed to whichever face actually resolved */
+  hasFace: false,
+};
+
+const SITE = window.location.origin;
+const GH   = 'https://github.com/SujaltheBIGG/finance-tracker';
+const DC   = GH;
+const DOCS = GH + '/tree/main/docs';
+const APP  = '/sessions/new';
+const HREF = {
+  'Tracking':'/features/tracking', 'Transactions':'/features/transactions',
+  'Budgeting':'/features/budgeting', 'Assistant':'/features/assistant',
+  'Pricing':'/pricing_free', 'Contribute':GH, 'Docs':DOCS,
+  'Documentation':DOCS, 'Join Community':DC, 'Self-Host':GH, 'GitHub':GH,
+  'Try our tools':'/tools', 'All Tools':'/tools',
+  'Compound Interest Calculator':'/tools/compound-interest-calculator',
+  'ROI Calculator':'/tools/roi-calculator',
+  'Financial Freedom Calculator':'/tools/financial-freedom-calculator',
+  'Exchange Rate Calculator':'/tools/exchange-rate-calculator',
+  'Privacy Policy':'/privacy', 'Terms of Service':'/tos',
+  'Ask about security':GH, 'Start contributing':GH, 'Join community':GH,
+  'Explore Founder Finance AI':'/sessions/new',
+  'try':APP, 'sample':'/registration/new', 'home':'/',
+  'github':GH, 'discord':DC,
+};
+const url = k => {
+  const h = HREF[k] || k || '/';
+  return /^https?:/.test(h) ? h : SITE + h;
+};
+
+function setLinkDestination(el, key){
+  el.href = url(key);
+  if (new URL(el.href).origin !== window.location.origin){
+    el.target = '_blank';
+    el.rel = 'noopener noreferrer';
+  }
+}
+
+/* Keep unavailable template destinations from being opened from here. */
+const UNAVAILABLE_HOSTS = new Set();
+const isUnavailableHost = href => {
+  try { return UNAVAILABLE_HOSTS.has(new URL(href).hostname); }
+  catch(e){ return false; }
+};
+
+function show400(opener){
+  const box = document.getElementById('err400');
+  box.classList.add('on');
+  box._opener = opener || null;
+}
+function hide400(){
+  const box = document.getElementById('err400');
+  box.classList.remove('on');
+  if (box._opener && box._opener.isConnected) box._opener.focus();
+  box._opener = null;
+}
+(function initErrorOverlay(){
+  const box = document.getElementById('err400');
+  box.addEventListener('click', e=>{ if (e.target === box) hide400(); });
+  window.addEventListener('keydown', e=>{ if (e.key === 'Escape' && box.classList.contains('on')) hide400(); });
+  /* one delegated, capture-phase interceptor covers every anchor this page
+     ever creates — the nav bar, both dropdowns, every section's links, and
+     the mobile sheet — including ones rebuilt after a resize */
+  document.addEventListener('click', e=>{
+    const a = e.target.closest('a[href]');
+    if (a && isUnavailableHost(a.href)){ e.preventDefault(); e.stopPropagation(); show400(a); }
+  }, true);
+})();
+
+/* ##COPY — the page's words, kept in one place so sections stay declarative */
+const COPY = {
+  nav:  ['Product','Resources','Pricing','Contribute'],
+  hero: {
+    h1: ['The personal finance', 'app for everyone'],
+    h1dim: '(by everyone)',
+    sub: 'Founder Finance is an all-in-one personal finance platform. Track, optimize,\ngrow, and manage your money through every stage of life.',
+    cta: '🚀 Try it (sample data!)',
+  },
+  add: {
+    h: ['Add anything,','yes anything'],
+    cards: [
+      ['addLink','Link everything automagically','Over 10,000+ institutions to choose from when linking all your accounts.'],
+      ['addChart','All your assets & debts charted','Visualize your accounts with charts, making it easy to understand at a glance.'],
+      ['addManual','Prefer manual? No problem','Add any account manually with custom built flows and import accounts via CSV.'],
+    ],
+  },
+  txn: {
+    h: ['Transactions','handled your way'],
+    cards: [
+      ['txnTop','Stay on top of every transaction','Easily track and organize your spending — add details, link transfers, and keep in sync.'],
+      ['txnFind','Find exactly what you need, instantly','Filter transactions by date, account, category, merchant and more to get precise results.'],
+      ['txnAuto','Automate your transactions, your way','Create rules to categorize transactions—saving time and organizing finances.'],
+    ],
+  },
+  budget: {
+    h: ['Budgeting,','made simple'],
+    cards: [
+      ['budSetup','Setup and customize your budget','Monitor category balances so you always know how much is left to spend.'],
+      ['budTrack','Track spending and stay in control','See where your money goes — monitor overages, compare spending trends, and adjust as needed.'],
+      ['budOpt','Optimize your budget','Setup smart allocations and make smarter financial decisions.'],
+    ],
+  },
+  trust: {
+    h: ['Uncompromising Security','Radical Transparency'],
+    cols: [
+      ['lock','Secure by design',"We treat your financial data like we'd want ours to be treated, by using strong encryption and secure authentication.",'Ask about security'],
+      ['code','Open source','We believe financial tools should be transparent. Founder Finance is open-source - you can review the code, contribute, or self-host for full control.','Start contributing'],
+      ['heart','Built in public','No hidden agendas, no gatekeeping-just a transparent, community-driven approach to creating the best financial tool possible.','Join community'],
+    ],
+    pills: ['No internal access','Encrypted data','Bank-grade security','Credentials not stored','No ads or upsells'],
+  },
+  ai: { h:['One more thing.',"And yes, it's AI."], link:'Explore Founder Finance AI' },
+  cta: { h:['Turn your maybe,','into a sure thing'], sub:'Start taking control of your money today.' },
+  footer: {
+    tag: 'The personal finance app for everyone (by everyone).',
+    cols: [
+      ['Product', ['Tracking','Transactions','Budgeting','Assistant']],
+      ['Resources',['Documentation','Join Community','Contribute']],
+      ['Tools',    ['Compound Interest Calculator','ROI Calculator','Financial Freedom Calculator','Exchange Rate Calculator','All Tools']],
+      ['Legal',    ['Privacy Policy','Terms of Service']],
+    ],
+    left: '© 2026 Founder Finance LLC',
+    right:'Built and designed by Fastcreek AI',
+  },
+};
+
+/* ##S01-UTIL ================================================================ */
+const clamp = (v,a,b) => v<a?a:v>b?b:v;
+const lerp  = (a,b,t) => a+(b-a)*t;
+const inv   = (a,b,v) => (v-a)/(b-a||1);
+const smooth= t => t*t*(3-2*t);
+const easeOutCubic = t => 1-Math.pow(1-t,3);
+const easeOutExpo  = t => t>=1?1:1-Math.pow(2,-10*t);
+const easeInOut    = t => t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2;
+/* frame-rate independent smoothing: rate is "fraction remaining after 1s" */
+const damp = (cur,to,rate,dt) => lerp(cur,to,1-Math.pow(rate,dt));
+
+/* deterministic noise so the generated chart is identical on every load */
+function mulberry(seed){ return function(){
+  seed|=0; seed=seed+0x6D2B79F5|0;
+  let t=Math.imul(seed^seed>>>15,1|seed);
+  t=t+Math.imul(t^t>>>7,61|t)^t;
+  return ((t^t>>>14)>>>0)/4294967296;
+};}
+
+/* ##ROUNDED-RECT — one shape helper feeds every card, pill and slab. Built
+   from arcs rather than an approximation so corners stay true at any radius. */
+function roundedShape(w,h,r){
+  r = Math.min(r, w/2, h/2);
+  const s = new THREE.Shape();
+  const x = -w/2, y = -h/2;
+  s.moveTo(x+r, y);
+  s.lineTo(x+w-r, y);      s.absarc(x+w-r, y+r,   r, -Math.PI/2, 0,          false);
+  s.lineTo(x+w,   y+h-r);  s.absarc(x+w-r, y+h-r, r, 0,          Math.PI/2,  false);
+  s.lineTo(x+r,   y+h);    s.absarc(x+r,   y+h-r, r, Math.PI/2,  Math.PI,    false);
+  s.lineTo(x,     y+r);    s.absarc(x+r,   y+r,   r, Math.PI,    Math.PI*1.5,false);
+  return s;
+}
+
+/* ShapeGeometry/ExtrudeGeometry hand back UVs in shape space. Remap them to
+   a clean 0..1 over the bounding box so a texture lands exactly on the face. */
+function remapUV(geo,w,h){
+  const p = geo.attributes.position, uv = geo.attributes.uv;
+  for(let i=0;i<p.count;i++){
+    uv.setXY(i, (p.getX(i)+w/2)/w, (p.getY(i)+h/2)/h);
+  }
+  uv.needsUpdate = true;
+  return geo;
+}
+function roundedPlaneGeo(w,h,r,curve){
+  const g = new THREE.ShapeGeometry(roundedShape(w,h,r), curve||12);
+  return remapUV(g,w,h);
+}
+function roundedSlabGeo(w,h,r,depth,bevel){
+  const b = bevel===undefined ? Math.min(depth*0.5, px(1.2)) : bevel;
+  const g = new THREE.ExtrudeGeometry(roundedShape(w,h,r), {
+    depth: Math.max(depth-b*2, 0.0001), bevelEnabled: b>0,
+    bevelThickness: b, bevelSize: b, bevelSegments: 2, curveSegments: 14, steps: 1,
+  });
+  g.translate(0,0,-depth/2);
+  g.computeVertexNormals();
+  return remapUV(g,w,h);
+}
+
+/* ##S02-TYPE ================================================================
+   A small typesetter that runs on a 2D canvas. It handles mixed runs — weights,
+   sizes, colours and inline vector badges on the same baseline — measures them,
+   breaks lines at the column width, then rasterises at a supersampled scale so
+   the result stays crisp when it is mapped onto geometry.
+   ======================================================================== */
+const SS = Math.min(2.6, Math.max(1.6, (window.devicePixelRatio||1) * 1.4));
+const MAXTEX = 4096;
+
+const FAM = { sans:T.sans, mono:T.mono, display:T.display };
+
+function fontStr(weight,size,fam){ return weight+' '+size+'px '+(FAM[fam]||T.sans); }
+
+function newCanvas(w,h){
+  const c = document.createElement('canvas');
+  c.width  = Math.max(1, Math.min(MAXTEX, Math.round(w*SS)));
+  c.height = Math.max(1, Math.min(MAXTEX, Math.round(h*SS)));
+  const x = c.getContext('2d');
+  x.scale(c.width/w, c.height/h);       // draw in CSS px, store at SS
+  return {c,x,w,h};
+}
+
+/* canvas rounded rect — used for pills, wells and mock UI chrome */
+function cRound(x,rx,ry,w,h,r){
+  r = Math.min(r,w/2,h/2);
+  if (!(r>=0)) r = 0;
+  x.beginPath();
+  x.moveTo(rx+r,ry);
+  x.arcTo(rx+w,ry,   rx+w,ry+h, r);
+  x.arcTo(rx+w,ry+h, rx,  ry+h, r);
+  x.arcTo(rx,  ry+h, rx,  ry,   r);
+  x.arcTo(rx,  ry,   rx+w,ry,   r);
+  x.closePath();
+}
+
+/* normalise a run list: bare strings inherit the block style */
+function normRuns(runs, base){
+  const out = [];
+  (Array.isArray(runs)?runs:[runs]).forEach(r=>{
+    if (r == null) return;
+    if (typeof r === 'string'){ out.push({s:r, ...base}); return; }
+    if (r.img){ out.push({img:r.img, w:r.w, h:r.h, dy:r.dy||0, pad:r.pad===undefined?6:r.pad}); return; }
+    out.push({...base, ...r, s:r.s});
+  });
+  return out;
+}
+
+/* break runs into atomic items (words + spaces + images) that a line can hold */
+function atomise(ctx, runs){
+  const items = [];
+  runs.forEach(r=>{
+    if (r.img){
+      const im = IMG[r.img];
+      const h  = r.h || 0, w = r.w || 0;
+      items.push({img:im, w:w + r.pad*2, iw:w, ih:h, dy:r.dy, br:false, space:false});
+      return;
+    }
+    /* split newlines out separately — a greedy \s+ would swallow "\n\n"
+       into one token and blank lines would silently disappear */
+    /* a non-breaking space is not a break opportunity, so a phrase joined with
+       one stays whole on a line instead of orphaning its second word */
+    const parts = r.s.split(/(\n|[^\S\n\u00A0]+)/);
+    parts.forEach(p=>{
+      if (p === '') return;
+      if (p === '\n'){ items.push({br:true,w:0}); return; }
+      ctx.font = fontStr(r.weight, r.size, r.fam);
+      ctx.letterSpacing = (r.ls||0)+'px';
+      items.push({
+        s:p, w:ctx.measureText(p).width, space:/^\s+$/.test(p),
+        weight:r.weight, size:r.size, fam:r.fam, color:r.color, ls:r.ls||0,
+        under:!!r.under,
+      });
+    });
+  });
+  return items;
+}
+
+function breakLines(items, maxW){
+  const lines = [];
+  let line = [], w = 0;
+  const push = ()=>{
+    while(line.length && line[line.length-1].space){ w -= line.pop().w; }
+    lines.push({items:line, w});
+    line = []; w = 0;
+  };
+  for (let i=0;i<items.length;i++){
+    const it = items[i];
+    if (it.br){ push(); continue; }
+    if (it.space && line.length === 0) continue;          // no leading space
+    if (w + it.w > maxW && line.length && !it.space){ push(); }
+    line.push(it); w += it.w;
+  }
+  push();
+  return lines.filter((l,i)=> l.items.length || i===0);
+}
+
+/* full block: measure -> break -> rasterise. Returns a canvas plus its CSS box */
+function typeset(spec){
+  const base = {
+    size: spec.size || 16, weight: spec.weight || 400,
+    fam: spec.fam || 'sans', color: spec.color || T.ink, ls: spec.ls || 0,
+  };
+  /* The block's box has to be sized by the largest thing in it, not by the
+     block default — most callers set the size on the runs, and sizing the
+     canvas off a 16px default silently guillotines a 64px headline. */
+  const rawRuns = Array.isArray(spec.runs) ? spec.runs : [spec.runs];
+  let big = base.size;
+  rawRuns.forEach(r=>{
+    if (r && typeof r === 'object'){
+      if (r.size) big = Math.max(big, r.size);
+      if (r.h)    big = Math.max(big, r.h*0.8);   // inline badges
+    }
+  });
+  const lh    = spec.lh || Math.round(big*1.35);
+  const align = spec.align || 'left';
+  const maxW  = spec.width || 1e6;
+  const pad   = spec.pad === undefined ? Math.ceil(big*0.45) : spec.pad;
+
+  const probe = document.createElement('canvas').getContext('2d');
+  const runs  = normRuns(spec.runs, base);
+  const items = atomise(probe, runs);
+  const lines = breakLines(items, maxW);
+
+  const blockW = spec.fixedWidth || Math.min(maxW, Math.max(1,...lines.map(l=>l.w)));
+  const W = Math.ceil(blockW) + pad*2;
+  const H = lines.length*lh + pad*2;
+
+  const {c,x} = newCanvas(W,H);
+  x.textBaseline = 'alphabetic';
+
+  lines.forEach((ln,i)=>{
+    let cx = pad;
+    if (align === 'center') cx = pad + (blockW - ln.w)/2;
+    if (align === 'right')  cx = pad + (blockW - ln.w);
+    const baseY = pad + i*lh + lh*0.74;
+    ln.items.forEach(it=>{
+      if (it.img){
+        if (it.img) x.drawImage(it.img, cx + (it.w-it.iw)/2, baseY - it.ih*0.78 + it.dy, it.iw, it.ih);
+        cx += it.w; return;
+      }
+      x.font = fontStr(it.weight, it.size, it.fam);
+      x.letterSpacing = it.ls+'px';
+      x.fillStyle = it.color;
+      x.fillText(it.s, cx, baseY);
+      if (it.under){
+        x.fillRect(cx, baseY + it.size*0.16, it.w, Math.max(1, it.size*0.055));
+      }
+      cx += it.w;
+    });
+  });
+  return {canvas:c, w:W, h:H, lines:lines.length, lh, pad};
+}
+
+/* ##LOGOTYPE — one renderer for the mark at every size it appears: the stacked
+   two-line lockup, and the single-line wordmark the bars use. Leading is set
+   tight enough that the two rows read as one block, as in the artwork. */
+function logoCanvas(size, color, lines){
+  lines = lines || BRAND.lines;
+  const fs = size;
+  const lh = Math.round(fs * (BRAND.hasFace ? 0.94 : 1.02));
+  const ls = fs * (BRAND.hasFace ? -0.004 : -0.028);
+  const probe = document.createElement('canvas').getContext('2d');
+  probe.font = '400 '+fs+'px '+BRAND.face;
+  probe.letterSpacing = ls+'px';
+  const ws = lines.map(t=>probe.measureText(t).width);
+  const W = Math.ceil(Math.max.apply(null, ws)) + Math.ceil(fs*0.14);
+  const H = lh*(lines.length-1) + Math.ceil(fs*1.30);
+  const {c,x} = newCanvas(W,H);
+  x.font = '400 '+fs+'px '+BRAND.face;
+  x.letterSpacing = ls+'px';
+  x.fillStyle = color || BRAND.ink;
+  x.textBaseline = 'alphabetic';
+  lines.forEach((t,i)=>{ x.fillText(t, (W-ws[i])/2, fs*0.80 + i*lh + fs*0.14); });
+  return {canvas:c, w:W, h:H};
+}
+const wordCanvas = (size,color) => logoCanvas(size, color, [BRAND.word]);
+
+/* ##S03-TEX ================================================================
+   Texture factory. Everything hands back a texture already configured for
+   colour-managed, mip-mapped, anisotropic sampling — planes in this scene are
+   viewed at a slight angle, so anisotropy is what keeps small type readable.
+   ======================================================================== */
+const IMG = {};                       // key -> Image | Canvas (rasterised svg)
+let MAXANISO = 4;
+
+function finishTex(t){
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = MAXANISO;
+  t.minFilter  = THREE.LinearMipmapLinearFilter;
+  t.magFilter  = THREE.LinearFilter;
+  t.generateMipmaps = true;
+  t.needsUpdate = true;
+  return t;
+}
+const canvasTex = c => finishTex(new THREE.CanvasTexture(c));
+
+/* SVGs carry an intrinsic size; rasterise them well above their display size
+   so they survive being magnified onto a plane. */
+function rasterSVG(img, w, h, scale){
+  const c = document.createElement('canvas');
+  c.width = Math.round(w*scale); c.height = Math.round(h*scale);
+  c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+  return c;
+}
+
+function loadAsset(key, url){
+  return new Promise((res,rej)=>{
+    const im = new Image();
+    im.crossOrigin = 'anonymous';
+    im.onload = ()=>{
+      if (/\.svg$/i.test(url)){
+        const w = im.naturalWidth || im.width, h = im.naturalHeight || im.height;
+        try { IMG[key] = rasterSVG(im, w, h, 4); }
+        catch(e){ IMG[key] = im; }
+        IMG[key].cssW = w; IMG[key].cssH = h;
+      } else {
+        IMG[key] = im;
+        IMG[key].cssW = im.naturalWidth; IMG[key].cssH = im.naturalHeight;
+      }
+      res(key);
+    };
+    im.onerror = ()=>{ IMG[key] = null; res(key); };
+    im.src = url;
+  });
+}
+
+const TEXCACHE = new Map();
+function assetTex(key){
+  if (TEXCACHE.has(key)) return TEXCACHE.get(key);
+  const src = IMG[key];
+  if (!src) return null;
+  const t = src instanceof HTMLCanvasElement ? new THREE.CanvasTexture(src) : new THREE.Texture(src);
+  finishTex(t);
+  TEXCACHE.set(key,t);
+  return t;
+}
+const aspect = key => { const s = IMG[key]; return s ? s.cssW/s.cssH : 1; };
+
+/* ##SOFT-SHADOW — a rounded rect blurred into an alpha ramp. Cheaper and more
+   controllable than a shadow map for the hundreds of small cards, and it
+   matches the very soft, very wide ambient shadow of the reference. */
+function shadowTex(w,h,r,blur,alpha){
+  const padp = blur*2;
+  const {c,x} = newCanvas(w+padp*2, h+padp*2);
+  x.filter = 'blur('+blur+'px)';
+  x.fillStyle = 'rgba(0,0,0,'+alpha+')';
+  cRound(x, padp, padp+blur*0.35, w, h, r);
+  x.fill();
+  const t = canvasTex(c); t.colorSpace = THREE.NoColorSpace;
+  return {tex:t, w:w+padp*2, h:h+padp*2};
+}
+
+/* ##GRAIN — a tileable value-noise field. Feeds roughnessMap on the paper so
+   the key light grazes it with a faint tooth instead of reading as flat vinyl. */
+function grainTex(size, amount){
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const x = c.getContext('2d');
+  const d = x.createImageData(size,size);
+  const rnd = mulberry(7);
+  for (let i=0;i<size*size;i++){
+    const v = 255 - (rnd()*amount)|0;
+    d.data[i*4] = d.data[i*4+1] = d.data[i*4+2] = v; d.data[i*4+3] = 255;
+  }
+  x.putImageData(d,0,0);
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.colorSpace = THREE.NoColorSpace;
+  t.repeat.set(24,24);
+  return t;
+}
+
+/* ##RESTAMP — the product screenshot ships with the previous mark baked into
+   its sidebar. Rather than leave a competing logo inside our own hero, the
+   bitmap is redrawn once at load: the mark's box is measured against the
+   sidebar fill, painted out, and the lockup set in its place. */
+function restampHeroShot(){
+  const src = IMG.heroShot;
+  if (!src || !src.naturalWidth) return;
+  const c = document.createElement('canvas');
+  c.width = src.naturalWidth; c.height = src.naturalHeight;
+  const x = c.getContext('2d');
+  x.drawImage(src, 0, 0);
+  const B = {x:42, y:27, w:84, h:78};          // measured against the sidebar fill
+  x.fillStyle = '#F7F7F7';
+  x.fillRect(B.x, B.y, B.w, B.h);
+  const lk = logoCanvas(26, BRAND.ink);
+  const k  = Math.min(B.w/lk.w, B.h/lk.h);
+  x.drawImage(lk.canvas, B.x + (B.w - lk.w*k)/2, B.y + (B.h - lk.h*k)/2, lk.w*k, lk.h*k);
+  c.cssW = c.width; c.cssH = c.height;
+  IMG.heroShot = c;
+}
+
+/* ##S04-MAT ================================================================
+   Materials. Physical surfaces (paper, cards, slabs, pills) are lit
+   MeshStandard so the key light actually models them; type is unlit so the
+   sampled ink colours land on screen exactly as measured.
+   ======================================================================== */
+let GRAIN = null;
+
+const matInk = (tex,opts={}) => new THREE.MeshBasicMaterial({
+  map:tex, transparent:true, depthWrite:false,
+  toneMapped:false, side:THREE.FrontSide, ...opts,
+});
+
+const matPaper = (color) => new THREE.MeshStandardMaterial({
+  color, roughness:0.94, metalness:0.0,
+  roughnessMap:GRAIN, envMapIntensity:0.35,
+});
+
+const matCard = (color, rough) => new THREE.MeshStandardMaterial({
+  color: color===undefined ? T.white : color,
+  roughness: rough===undefined ? 0.58 : rough,
+  metalness: 0.0, envMapIntensity: 0.6,
+});
+
+const matShot = (tex) => new THREE.MeshStandardMaterial({
+  map:tex, roughness:0.5, metalness:0.0, envMapIntensity:0.45,
+});
+
+/* ##SHADER: amber strip — reproduces border-strip.svg procedurally, including
+   the two soft-light highlight bands that ride over the ramp. */
+function stripMaterial(){
+  return new THREE.ShaderMaterial({
+    transparent:true, depthTest:false, depthWrite:false,
+    uniforms:{
+      cA:{value:new THREE.Color(T.amberN[0])}, cB:{value:new THREE.Color(T.amberN[1])},
+      cC:{value:new THREE.Color(T.amberN[2])}, cD:{value:new THREE.Color(T.amberN[3])},
+      t:{value:0},
+    },
+    vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+    fragmentShader:`
+      varying vec2 vUv; uniform vec3 cA,cB,cC,cD; uniform float t;
+      // the svg ramp: 0 -> .274 -> .63 -> 1
+      vec3 ramp(float x){
+        if(x<.274) return mix(cA,cB,x/.274);
+        if(x<.63)  return mix(cB,cC,(x-.274)/.356);
+        return mix(cC,cD,(x-.63)/.37);
+      }
+      // soft-light blend against white, the same op the source artwork uses
+      vec3 softLight(vec3 b, float s){
+        return mix(b, sqrt(b)*(2.*s-1.)+2.*b*(1.-s), .6*s);
+      }
+      float band(float x, float a, float b){
+        float m = smoothstep(a, mix(a,b,.5), x) * (1.-smoothstep(mix(a,b,.5), b, x));
+        return m;
+      }
+      void main(){
+        float x = vUv.x;
+        vec3 col = ramp(x);
+        // two travelling highlights, seeded at the source artwork's positions
+        float p = fract(t*.045);
+        col = softLight(col, band(fract(x - p + .5), .116, .394)*.9);
+        col = softLight(col, band(fract(x - p),      .650, .928)*.9);
+        gl_FragColor = vec4(col,1.);
+      }`,
+  });
+}
+
+/* ##SHADER: warm bloom under the hero CTA. Measured off the capture: the page
+   at #F5F5F5 shifts to (244,231,223) at the core, i.e. #F2C09E at ~0.25 alpha
+   with an inverse-square-ish falloff. */
+function glowMaterial(color, peak, powr){
+  return new THREE.ShaderMaterial({
+    transparent:true, depthWrite:false, depthTest:true,
+    blending:THREE.NormalBlending,
+    uniforms:{ c:{value:new THREE.Color(color)}, peak:{value:peak}, p:{value:powr||2.0}, t:{value:0} },
+    vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+    fragmentShader:`
+      varying vec2 vUv; uniform vec3 c; uniform float peak,p,t;
+      void main(){
+        vec2 d = (vUv-.5)*2.;
+        float r = length(d);
+        float a = pow(max(0., 1.-r), p);
+        a *= peak * (0.93 + 0.07*sin(t*1.1));
+        gl_FragColor = vec4(c, a);
+      }`,
+  });
+}
+
+/* ##SHADER: the CTA's travelling gradient.
+   This is the one animation the reference page actually runs — its button
+   carries `animate-rainbow` over a `bg-[length:200%]` gradient, i.e. the ramp
+   is laid out at twice the button's width and its background-position is
+   driven 0% -> 200% on a 2s linear loop. Reproduced here on the brand ramp:
+   uv.x is halved to get the 200% size, and t/2 scrolls one full period per
+   two seconds. `edge` picks between the welded bottom rule and the soft
+   underglow, so both share exactly one phase. */
+function rainbowMaterial(edge){
+  return new THREE.ShaderMaterial({
+    transparent:true, depthWrite:false,
+    uniforms:{ c0:{value:new THREE.Color(T.amberN[0])}, c1:{value:new THREE.Color(T.amberN[1])},
+               c2:{value:new THREE.Color(T.amberN[2])}, c3:{value:new THREE.Color(T.amberN[3])},
+               t:{value:0}, edge:{value:edge?1:0} },
+    vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+    fragmentShader:`
+      varying vec2 vUv; uniform vec3 c0,c1,c2,c3; uniform float t,edge;
+      vec3 ramp(float x){
+        x = fract(x);
+        if(x<.25) return mix(c0,c1,x/.25);
+        if(x<.50) return mix(c1,c2,(x-.25)/.25);
+        if(x<.75) return mix(c2,c3,(x-.50)/.25);
+        return mix(c3,c0,(x-.75)/.25);
+      }
+      void main(){
+        vec3 col = ramp(vUv.x*0.5 + t*0.5);      // 200% size, 2s linear loop
+        float ends = smoothstep(0.,.16,vUv.x)*(1.-smoothstep(.84,1.,vUv.x));
+        float a = edge > .5
+          ? pow(1.-vUv.y, 5.0) * ends * .95      // the welded bottom rule
+          : smoothstep(.06,.30,vUv.x)*(1.-smoothstep(.70,.94,vUv.x))     // w-3/5
+            * smoothstep(.10,.46,vUv.y)*(1.-smoothstep(.54,.92,vUv.y))     // h-1/5
+            * .78;                                                          // blur(.8rem)
+        gl_FragColor = vec4(col, a);
+      }`,
+  });
+}
+
+/* ##SHADER: dark slab for the AI act — a slow vertical falloff plus a faint
+   dither so the large flat area does not band on 8-bit displays. */
+function darkSlabMaterial(){
+  return new THREE.ShaderMaterial({
+    uniforms:{ top:{value:new THREE.Color(0x1B1B1B)}, bot:{value:new THREE.Color(0x131313)},
+               glow:{value:new THREE.Color(0xF15B29)}, t:{value:0} },
+    vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+    fragmentShader:`
+      varying vec2 vUv; uniform vec3 top,bot,glow; uniform float t;
+      float hash(vec2 p){ return fract(sin(dot(p,vec2(41.3,289.1)))*43758.5453); }
+      void main(){
+        vec3 col = mix(bot, top, smoothstep(0.,1.,vUv.y));
+        // orange bloom seeded where the assistant mark sits
+        vec2 g = (vUv - vec2(.5,.88));
+        g.x *= 3.2;
+        float d = length(g);
+        col += glow * pow(max(0.,1.-d*2.6), 3.5) * (0.30 + 0.06*sin(t*1.3));
+        col += (hash(vUv*vec2(1024.,768.))-.5)*0.006;
+        gl_FragColor = vec4(col,1.);
+      }`,
+  });
+}
+
+/* ##S05-BUILD ==============================================================
+   Mesh builders. Every one of these takes CSS pixels in and returns an object
+   already positioned in world units, so the section code below reads like
+   ordinary page layout.
+   ======================================================================== */
+
+/* flat, unlit type. Anchored top-left of its own box so flow layout is simple. */
+function textMesh(spec){
+  const ts = typeset(spec);
+  const g  = new THREE.PlaneGeometry(px(ts.w), px(ts.h));
+  const m  = new THREE.Mesh(g, matInk(canvasTex(ts.canvas)));
+  m.userData.box = {w:ts.w, h:ts.h, pad:ts.pad, lh:ts.lh, lines:ts.lines};
+  m.renderOrder = 4;
+  return m;
+}
+
+/* the very soft ambient drop the reference cards sit on */
+function shadowMesh(w,h,r,blur,alpha,drop){
+  const s = shadowTex(w,h,r,blur,alpha);
+  const m = new THREE.Mesh(
+    new THREE.PlaneGeometry(px(s.w), px(s.h)),
+    new THREE.MeshBasicMaterial({map:s.tex, transparent:true, depthWrite:false,
+      color:0x000000, opacity:1, toneMapped:false})
+  );
+  m.material.map.colorSpace = THREE.NoColorSpace;
+  m.position.y = -px(drop||0);
+  m.renderOrder = 1;
+  return m;
+}
+
+/* a real extruded slab: bevelled edges catch the key light, which is what
+   sells these as objects rather than rectangles */
+function slab(w,h,r,depth,mat){
+  const m = new THREE.Mesh(roundedSlabGeo(px(w),px(h),px(r),px(depth)), mat||matCard());
+  m.renderOrder = 2;
+  return m;
+}
+function flatCard(w,h,r,mat){
+  const m = new THREE.Mesh(roundedPlaneGeo(px(w),px(h),px(r)), mat||matCard());
+  m.renderOrder = 2;
+  return m;
+}
+
+/* screenshot on a rounded panel, with the panel well behind it */
+function shotPanel(key,w,r,opts={}){
+  const g = new THREE.Group();
+  const asp = aspect(key);
+  const h = opts.h || w/asp;
+  if (opts.shadow !== false){
+    const s = shadowMesh(w,h,r, opts.blur||34, opts.alpha||0.055, opts.drop||10);
+    s.position.z = px(-0.6); g.add(s);
+  }
+  const tex = assetTex(key);
+  const mat = tex ? matShot(tex) : matCard(T.panel);
+  const m = new THREE.Mesh(roundedSlabGeo(px(w),px(h),px(r),px(opts.depth||2.2)), mat);
+  if (opts.cover && tex){               // crop instead of squash
+    /* the texture is shared out of the cache, so clone before re-framing it */
+    const t2 = tex.clone(); t2.needsUpdate = true; m.material.map = t2;
+    const want = w/h;
+    if (asp > want){ const s = want/asp; t2.repeat.set(s,1); t2.offset.set((1-s)/2,0); }
+    else {
+      const s = asp/want; t2.repeat.set(1,s);
+      /* uv origin is bottom-left, so a top anchor keeps the top of the image */
+      t2.offset.set(0, opts.anchor==='top' ? 1-s : (1-s)/2);
+    }
+  }
+  m.castShadow = !!opts.castShadow;
+  g.add(m);
+  g.userData.size = {w,h};
+  return g;
+}
+
+/* pill button. Dark variant carries the amber underglow from the reference. */
+function pillButton(label, opts={}){
+  const g = new THREE.Group();
+  const h  = opts.h || 44;
+  const fs = opts.size || 16;
+  const ts = typeset({runs:[{s:label, size:fs, weight:500, color:opts.color||T.onDark}], pad:2});
+  const w  = opts.w || Math.ceil(ts.w) + (opts.px||24)*2;
+  const r  = h/2;
+
+  const sh = shadowMesh(w,h,r, opts.blur||26, opts.alpha||0.16, 8);
+  sh.position.z = px(-0.8); g.add(sh);
+
+  const body = new THREE.Mesh(
+    roundedSlabGeo(px(w),px(h),px(r),px(opts.depth||3.4)),
+    new THREE.MeshStandardMaterial({
+      color: opts.bg===undefined?0x101010:opts.bg,
+      roughness: opts.rough===undefined?0.42:opts.rough,
+      metalness: 0.0, envMapIntensity:0.9,
+    })
+  );
+  body.castShadow = false; g.add(body);
+
+  if (opts.amber !== false && (opts.bg===undefined || opts.bg===0x101010)){
+    const e = new THREE.Mesh(new THREE.PlaneGeometry(px(w+2), px(h+2)), rainbowMaterial(true));
+    e.position.z = px(opts.depth?opts.depth/2+0.4:2.1); e.renderOrder = 5; g.add(e);
+    const un = new THREE.Mesh(new THREE.PlaneGeometry(px(w*1.35), px(h*1.9)), rainbowMaterial(false));
+    un.position.set(0, -px(h*0.46), px(-1.2)); un.renderOrder = 0; g.add(un);
+    ANIM.push(t=>{ e.material.uniforms.t.value = t; un.material.uniforms.t.value = t; });
+  }
+
+  const lab = new THREE.Mesh(new THREE.PlaneGeometry(px(ts.w),px(ts.h)),
+                             matInk(canvasTex(ts.canvas)));
+  lab.position.z = px((opts.depth||3.4)/2 + 0.5); lab.renderOrder = 6;
+  g.add(lab);
+  g.userData.size = {w,h};
+  return g;
+}
+
+/* outlined pill: the "Docs" control, the trust chips, the AI prompt chips */
+function ghostPill(label, opts={}){
+  const h  = opts.h || 34, fs = opts.size || 14;
+  const ts = typeset({runs:[{s:label, size:fs, weight:opts.weight||450,
+                             color:opts.color||T.ink, fam:opts.fam||'sans'}], pad:2});
+  const w  = opts.w || Math.ceil(ts.w) + (opts.px||16)*2 + (opts.lead||0);
+  const g  = new THREE.Group();
+
+  const ring = new THREE.Mesh(
+    roundedPlaneGeo(px(w),px(h),px(h/2)),
+    new THREE.MeshBasicMaterial({color:opts.border===undefined?0xE2E2E2:opts.border,
+                                 transparent:true, opacity:opts.borderA===undefined?1:opts.borderA,
+                                 toneMapped:false})
+  );
+  const fill = new THREE.Mesh(
+    roundedPlaneGeo(px(w-2),px(h-2),px((h-2)/2)),
+    new THREE.MeshBasicMaterial({color:opts.bg===undefined?0xFDFDFD:opts.bg,
+                                 transparent:true, opacity:opts.bgA===undefined?1:opts.bgA,
+                                 toneMapped:false})
+  );
+  fill.position.z = px(0.05);
+  const lab = new THREE.Mesh(new THREE.PlaneGeometry(px(ts.w),px(ts.h)),
+                             matInk(canvasTex(ts.canvas)));
+  lab.position.set(px((opts.lead||0)/2), 0, px(0.12));
+  g.add(ring,fill,lab);
+  g.userData.size = {w,h};
+  g.userData.label = lab;
+  return g;
+}
+
+/* circular icon button (github / discord) built as a real disc + bevel */
+function iconDisc(key, d, opts={}){
+  const g = new THREE.Group();
+  const sh = shadowMesh(d,d,d/2, 16, .12, 5); sh.position.z = px(-0.6); g.add(sh);
+  const body = new THREE.Mesh(
+    new THREE.CylinderGeometry(px(d/2), px(d/2), px(2.6), 48, 1, false),
+    new THREE.MeshStandardMaterial({color:opts.bg===undefined?0xFDFDFD:opts.bg,
+                                    roughness:.45, metalness:0, envMapIntensity:.8})
+  );
+  body.rotation.x = Math.PI/2; g.add(body);
+  const t = assetTex(key);
+  if (t){
+    const s = opts.icon || d*0.44;
+    const ic = new THREE.Mesh(new THREE.PlaneGeometry(px(s),px(s)), matInk(t));
+    ic.position.z = px(1.6); g.add(ic);
+  }
+  g.userData.size = {w:d,h:d};
+  return g;
+}
+
+/* ##RIBBON — constant-width polyline as real geometry. WebGL will not draw a
+   line thicker than 1px, so the curve is extruded along its own normals: for
+   each sample the tangent is averaged from both neighbours, the normal is its
+   perpendicular, and two vertices are emitted. An arclength attribute rides
+   along so the curve can draw itself on. */
+function ribbon(pts, width, color, opts={}){
+  const n = pts.length;
+  const pos = new Float32Array(n*2*3);
+  const at  = new Float32Array(n*2);
+  let acc = 0; const cum = [0];
+  for (let i=1;i<n;i++){ acc += pts[i].distanceTo(pts[i-1]); cum.push(acc); }
+  const hw = width/2;
+  for (let i=0;i<n;i++){
+    const p0 = pts[Math.max(0,i-1)], p1 = pts[Math.min(n-1,i+1)];
+    let tx = p1.x-p0.x, ty = p1.y-p0.y;
+    const L = Math.hypot(tx,ty)||1; tx/=L; ty/=L;
+    const nx = -ty, ny = tx;
+    pos[i*6+0] = pts[i].x + nx*hw; pos[i*6+1] = pts[i].y + ny*hw; pos[i*6+2] = 0;
+    pos[i*6+3] = pts[i].x - nx*hw; pos[i*6+4] = pts[i].y - ny*hw; pos[i*6+5] = 0;
+    at[i*2] = at[i*2+1] = cum[i]/(acc||1);
+  }
+  const idx = [];
+  for (let i=0;i<n-1;i++){
+    const a=i*2, b=i*2+1, c=(i+1)*2, d=(i+1)*2+1;
+    idx.push(a,b,c, b,d,c);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  g.setAttribute('aT',       new THREE.BufferAttribute(at,1));
+  g.setIndex(idx);
+
+  const mat = new THREE.ShaderMaterial({
+    transparent:true, depthWrite:false, side:THREE.DoubleSide,
+    uniforms:{ c:{value:new THREE.Color(color)}, prog:{value:opts.prog===undefined?1:opts.prog},
+               op:{value:opts.opacity===undefined?1:opts.opacity} },
+    vertexShader:`attribute float aT; varying float vT;
+      void main(){ vT=aT; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+    fragmentShader:`varying float vT; uniform vec3 c; uniform float prog,op;
+      void main(){
+        if (vT > prog) discard;
+        float edge = 1.0 - smoothstep(prog-0.035, prog, vT);
+        gl_FragColor = vec4(c, op*mix(.35,1.,edge));
+      }`,
+  });
+  const m = new THREE.Mesh(g, mat);
+  m.renderOrder = 1;
+  return m;
+}
+
+/* ##SERIES — a seeded fractal random walk with drift. Same numbers every load,
+   so the "market" behind the hero is stable art direction, not noise. */
+function series(n, seed, drift, vol){
+  const r = mulberry(seed);
+  const raw = []; let v = 0, m = 0;
+  for (let i=0;i<n;i++){
+    m = m*0.90 + (r()-0.5)*vol;              // momentum-smoothed step
+    v += m + drift;
+    raw.push(v);
+  }
+  /* a 5-tap binomial pass: keeps the shape, loses the per-sample hash noise
+     that made the curve read as static rather than as a market */
+  const k = [1,4,6,4,1], ks = 16, out = [];
+  for (let i=0;i<n;i++){
+    let a = 0;
+    for (let j=-2;j<=2;j++) a += raw[clamp(i+j,0,n-1)] * k[j+2];
+    out.push(a/ks);
+  }
+  const lo = Math.min(...out), hi = Math.max(...out);
+  return out.map(x => (x-lo)/((hi-lo)||1));  // normalised 0..1
+}
+
+/* dashed vertical rule, drawn as geometry with an alpha ramp shader */
+function dashRule(h, color, opts={}){
+  const m = new THREE.Mesh(
+    new THREE.PlaneGeometry(px(opts.w||1), px(h)),
+    new THREE.ShaderMaterial({
+      transparent:true, depthWrite:false,
+      uniforms:{ c:{value:new THREE.Color(color)}, n:{value:h/(opts.dash||9)},
+                 op:{value:opts.opacity===undefined?1:opts.opacity},
+                 fade:{value:opts.fade===undefined?0:opts.fade} },
+      vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+      fragmentShader:`varying vec2 vUv; uniform vec3 c; uniform float n,op,fade;
+        void main(){
+          float d = step(.45, fract(vUv.y*n));
+          float f = mix(1., smoothstep(0.,.35,vUv.y)*(1.-smoothstep(.65,1.,vUv.y)), fade);
+          gl_FragColor = vec4(c, d*op*f);
+        }`,
+    })
+  );
+  m.renderOrder = 1;
+  return m;
+}
+
+/* ##S06-STAGE ==============================================================
+   Renderer, cameras, lights, and the registries that sections push into.
+
+   Scale contract: 1 CSS pixel == U world units, and the camera sits at exactly
+   the distance where the z=0 plane measures one screen height. That means a
+   section can be laid out in ordinary pixel coordinates and still parallax
+   correctly the moment anything moves off that plane.
+   ======================================================================== */
+const cv = document.getElementById('gl');
+let renderer, camera, scene, overlay, overlayCam, world, navRoot;
+const ANIM   = [];      // t => void, every frame
+const REVEAL = [];      // scroll-driven entrance transforms
+const SCRUB  = [];      // s => void, raw scroll subscribers
+
+const V = { w:0, h:0, dpr:1, col:0, mobile:false };
+const FOV = 30;
+
+/* ##LIGHT UNITS — three r155+ dropped the legacy PI scale factor on ambient
+   and directional intensities, so an intensity of 1 now returns albedo/PI.
+   Every intensity below is authored in "fraction of albedo" and multiplied
+   through this, which is what keeps #F5F5F5 paper resolving to #F5F5F5. */
+const LU = Math.PI;
+
+function initStage(){
+  renderer = new THREE.WebGLRenderer({canvas:cv, antialias:true, alpha:false,
+                                      powerPreference:'high-performance',
+                                      /* keep the buffer readable so the page can be
+                                         screenshotted / saved as an image */
+                                      preserveDrawingBuffer:true});
+  renderer.setClearColor(T.bg, 1);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.NoToneMapping;     // ink colours must land exact
+  renderer.localClippingEnabled = true;   // the AI marquees are clipped to the slab
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  MAXANISO = renderer.capabilities.getMaxAnisotropy();
+
+  scene   = new THREE.Scene();
+  scene.background = new THREE.Color(T.bg);
+  camera  = new THREE.PerspectiveCamera(FOV, 1, 0.1, 400);
+
+  /* ##LIGHTS — calibrated, not decorative. A surface facing the camera has to
+     resolve to exactly its sampled albedo, otherwise #F5F5F5 paper renders as
+     grey mush or blows out to white. Ambient + key(N·L) + fill is solved to
+     total 1.0 for a front-facing normal; everything the key does beyond that
+     lands on the bevels and edges, which is where we want the modelling. */
+  const amb = new THREE.AmbientLight(0xffffff, 0.50*LU);
+  scene.add(amb);
+
+  const keyDir  = new THREE.Vector3(-0.26, 0.52, 1.0).normalize(); // N·L = 0.858
+  const key     = new THREE.DirectionalLight(0xfffdfa, 0.545*LU);  // 0.545*0.858 = 0.468
+  const fill    = new THREE.DirectionalLight(0xeef2ff, 0.055*LU);
+  /* light rides with the camera so shading and the shadow frustum stay
+     consistent down a 30,000px document */
+  key.position.copy(keyDir).multiplyScalar(9);
+  key.target.position.set(0,0,0);
+  key.castShadow = true;
+  key.shadow.mapSize.set(2048,2048);
+  key.shadow.camera.near = 0.5; key.shadow.camera.far = 22;
+  key.shadow.camera.left = -9; key.shadow.camera.right = 9;
+  key.shadow.camera.top  =  6; key.shadow.camera.bottom = -6;
+  key.shadow.bias = -0.0009; key.shadow.normalBias = 0.02; key.shadow.radius = 3;
+  fill.position.set(4,-3,6);
+  camera.add(key, key.target, fill, fill.target);
+  scene.add(camera);
+
+  world = new THREE.Group(); scene.add(world);
+
+  /* fixed chrome (amber strip + nav) lives in its own pixel-space pass */
+  overlay    = new THREE.Scene();
+  overlayCam = new THREE.OrthographicCamera(-1,1,1,-1,-10,10);
+  navRoot    = new THREE.Group(); overlay.add(navRoot);
+
+  GRAIN = grainTex(128, 26);
+}
+
+/* camera distance where the z=0 plane is exactly one viewport tall */
+function camZ(){ return (V.h*U/2) / Math.tan(FOV*Math.PI/360); }
+
+/* ##FLOW — a vertical cursor in document pixels. Sections advance it; the
+   converter turns a (centre-x, top, height) box into world coordinates. */
+const flow = {
+  y: 0,
+  gap(n){ this.y += n; return this.y; },
+  /* place obj so its box top sits at the cursor, then advance */
+  put(obj, h, opts={}){
+    const top = this.y + (opts.mt||0);
+    obj.position.x = px(opts.x||0);
+    obj.position.y = -px(top + h/2);
+    obj.position.z = px(opts.z||0);
+    this.y = top + h + (opts.mb||0);
+    obj.userData.docTop = top; obj.userData.docH = h;
+    return top;
+  },
+  /* place without advancing (absolutely-positioned decoration) */
+  pin(obj, h, top, x, z){
+    obj.position.set(px(x||0), -px(top + h/2), px(z||0));
+    obj.userData.docTop = top; obj.userData.docH = h;
+    return top;
+  },
+};
+
+/* ##REVEAL — entrance transform driven by document position, not by time, so
+   scrubbing backwards is exact. Each item interpolates from an offset pose to
+   its resting pose across a window as it climbs into view. */
+/* ##MOTION POLICY — reveals are opt-in and limited to the hero and AI slab.
+   All other sections remain fully visible while scrolling. */
+let REVEAL_ON = false;
+/* document-space y where the hero's content finishes (including the product
+   shot, which deliberately overlaps into the next band). Set once per build
+   at the end of sectionHero(); the pointer-parallax fade reads it every frame
+   to know when the hero has genuinely scrolled out of view. */
+let HERO_END = 0;
+
+function reveal(obj, opts={}){
+  if (!REVEAL_ON) return obj;
+  const from = {dy:opts.dy===undefined?46:opts.dy, dz:opts.dz===undefined?-70:opts.dz,
+                rx:opts.rx===undefined?0.10:opts.rx, op:opts.op===undefined?0:opts.op,
+                sc:opts.sc===undefined?1:opts.sc};
+  const base = {y:obj.position.y, z:obj.position.z, rx:obj.rotation.x, sc:obj.scale.x};
+  const mats = [];
+  if (from.op < 1) obj.traverse(o=>{ if (o.material) mats.push(o.material); });
+  mats.forEach(m=>{ m.userData.wasT = m.transparent; m.userData.baseOp = m.opacity; });
+  REVEAL.push({obj, from, base, mats,
+               head: opts.head===undefined?0.92:opts.head,
+               tail: opts.tail===undefined?0.42:opts.tail,
+               ease: opts.ease || easeOutCubic});
+  return obj;
+}
+
+function applyReveals(scroll){
+  /* the last viewport of the page can never be scrolled past, so an element
+     down there would sit forever at a fraction of its reveal. Clamp each
+     window into the range the document can actually reach. */
+  const maxS = Math.max(0, SCROLL.docH - V.h);
+  for (let i=0;i<REVEAL.length;i++){
+    const r = REVEAL[i];
+    const centre = (r.obj.userData.docTop||0) + (r.obj.userData.docH||0)/2;
+    let a = centre - V.h*r.head, b = centre - V.h*r.tail;
+    if (b > maxS){ b = maxS; a = Math.min(a, b - V.h*0.30); }
+    const p = r.ease(clamp(inv(a, b, scroll), 0, 1));
+    const k = 1-p;
+    r.obj.position.y = r.base.y - px(r.from.dy)*k;
+    r.obj.position.z = r.base.z + px(r.from.dz)*k;
+    r.obj.rotation.x = r.base.rx + r.from.rx*k;
+    if (r.from.sc !== 1){ const s = lerp(r.from.sc, r.base.sc, p); r.obj.scale.setScalar(s); }
+    if (r.mats.length){
+      const o = lerp(r.from.op, 1, Math.min(1,p*1.35));
+      const landed = o > 0.999;
+      for (let j=0;j<r.mats.length;j++){
+        const m = r.mats[j];
+        m.opacity     = m.userData.baseOp * o;
+        m.transparent = landed ? m.userData.wasT : true;
+      }
+    }
+  }
+}
+
+/* ##SECTION HELPERS ------------------------------------------------------- */
+/* full-bleed background band (the white feature container, the trust band) */
+function band(top, h, color, radius){
+  const w = V.w + 4;
+  const m = radius
+    ? new THREE.Mesh(roundedPlaneGeo(px(w - (V.mobile?16:24)), px(h), px(radius)), matPaper(color))
+    : new THREE.Mesh(new THREE.PlaneGeometry(px(w), px(h)), matPaper(color));
+  m.position.y = -px(top + h/2);
+  m.position.z = px(-2);
+  m.receiveShadow = true;
+  m.renderOrder = 0;
+  world.add(m);
+  return m;
+}
+
+/* two-line section heading: solid line then a muted line, centred */
+function heading(lines, opts={}){
+  const size = opts.size || (V.mobile ? 34 : 56);
+  const lh   = Math.round(size*1.16);
+  const g = new THREE.Group();
+  const t1 = textMesh({runs:[{s:lines[0], size, weight:500, color:opts.c1||T.ink, ls:-size*0.018}],
+                       align:'center', width:V.col});
+  const t2 = textMesh({runs:[{s:lines[1], size, weight:500, color:opts.c2||T.faint, ls:-size*0.018}],
+                       align:'center', width:V.col});
+  t1.position.y =  px(lh/2 - 2);
+  t2.position.y = -px(lh/2 + 2);
+  g.add(t1,t2);
+  g.userData.size = {w:V.col, h:lh*2};
+  return g;
+}
+
+/* ##S18-LINKS =============================================================
+   The interaction layer.
+
+   A canvas has no links in it. Whatever is painted there, a WebGL page still
+   owes the reader an href they can middle-click, a tab stop they can reach,
+   and something a screen reader can announce. So every interactive element
+   registers a transparent <a> that is re-projected onto its own geometry every
+   frame: the pixels come from the scene, the semantics come from the DOM.
+
+   Hover feedback runs the other way — the anchor reports pointer state and the
+   material reacts, on the reference's own 150ms ease-in-out.
+   ======================================================================== */
+const HITS = [];
+let hitLayer = null;
+const _hv = new THREE.Vector3();
+
+function clearHits(){
+  HITS.length = 0;
+  if (hitLayer) hitLayer.innerHTML = '';
+}
+
+/* one interactive element: geometry in, anchor out */
+function hitFor(obj, w, h, key, opts={}){
+  if (!hitLayer) hitLayer = document.getElementById('hits');
+  const el = document.createElement('a');
+  el.className = 'hit';
+  el.setAttribute('aria-label', opts.label || key);
+  if (opts.trigger){
+    /* a menu trigger is a disclosure control, not a destination: no href, so
+       it never offers a URL it cannot honour, but still focusable and
+       announced with its open/closed state */
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-expanded', 'false');
+    el.setAttribute('aria-haspopup', 'true');
+  } else {
+    setLinkDestination(el, key);
+  }
+  hitLayer.appendChild(el);
+  const rec = {obj, w, h, el, screen:!!opts.screen, hv:0, want:0, on:opts.on||null, dd:null};
+  const enter = ()=>{ rec.want = 1; }, leave = ()=>{ rec.want = 0; };
+  el.addEventListener('pointerenter', enter);
+  el.addEventListener('pointerleave', leave);
+  el.addEventListener('focus', enter);
+  el.addEventListener('blur',  leave);
+  HITS.push(rec);
+  return rec;
+}
+
+/* darken type on hover, the way the reference's `group-hover:text-gray-900` does */
+const inkHover = root => v => root.traverse(o=>{
+  if (o.material && o.material.color) o.material.color.setScalar(lerp(1, 0.42, v));
+});
+/* controls lift toward the reader instead */
+const liftHover = (root, base, amt) => v => { root.position.z = px(base + amt*v); };
+
+/* ##DROPDOWN — the reference reveals these on hover: white card, rounded-xl,
+   shadow-lg, opacity 0->1 with an 8px lift over 300ms ease-in-out. Built in the
+   DOM because they are transient hover surfaces made entirely of links. */
+function dropdownFor(rec, rows){
+  const d = document.createElement('div');
+  d.className = 'dd';
+  d.style.width = (rows.wide ? 340 : 300) + 'px';
+  rows.items.forEach(r=>{
+    if (r.sep){ const h = document.createElement('div'); h.className='sep';
+                h.textContent = r.sep; d.appendChild(h); return; }
+    const a = document.createElement('a');
+    setLinkDestination(a, r.k);
+    a.innerHTML = '<div class="t"></div>' + (r.d ? '<div class="d"></div>' : '');
+    a.querySelector('.t').textContent = r.t;
+    if (r.d) a.querySelector('.d').textContent = r.d;
+    d.appendChild(a);
+  });
+  hitLayer.appendChild(d);
+  rec.dd = d;
+
+  let openT = 0;
+  const open = ()=>{ clearTimeout(openT); d.classList.add('on'); rec.want = 1;
+                     rec.el.setAttribute('aria-expanded','true'); };
+  const shut = ()=>{ d.classList.remove('on'); rec.want = 0;
+                     rec.el.setAttribute('aria-expanded','false'); };
+  /* a short grace period so the pointer can cross the gap to the panel */
+  const close = ()=>{ openT = setTimeout(shut, 120); };
+  rec.el.addEventListener('pointerenter', open);
+  rec.el.addEventListener('pointerleave', close);
+  rec.el.addEventListener('focus', open);
+  d.addEventListener('pointerenter', open);
+  d.addEventListener('pointerleave', close);
+  d.addEventListener('focusout', e=>{ if (!d.contains(e.relatedTarget)) close(); });
+  rec.el.addEventListener('click', e=>{ e.preventDefault();
+    d.classList.contains('on') ? shut() : open(); });
+  rec.el.addEventListener('keydown', e=>{
+    if (e.key === 'Enter' || e.key === ' '){ e.preventDefault();
+      d.classList.contains('on') ? shut() : open(); }
+    if (e.key === 'Escape') shut();
+  });
+  d.addEventListener('keydown', e=>{ if (e.key === 'Escape'){ shut(); rec.el.focus(); } });
+  return d;
+}
+
+/* project every registered element onto its geometry */
+function syncHits(){
+  if (!HITS.length) return;
+  const tanH = Math.tan(FOV*Math.PI/360);
+  for (let i=0;i<HITS.length;i++){
+    const r = HITS[i];
+    r.obj.updateWorldMatrix(true, false);
+    _hv.setFromMatrixPosition(r.obj.matrixWorld);
+    let cx, cy, sw, sh;
+    if (r.screen){
+      /* nav lives in the overlay pass, already authored in screen pixels */
+      cx = V.w/2 + _hv.x; cy = V.h/2 - _hv.y; sw = r.w; sh = r.h;
+    } else {
+      const dist = camera.position.z - _hv.z;
+      if (dist <= 0.05){ r.el.style.display = 'none'; continue; }
+      const p = _hv.project(camera);
+      cx = (p.x*0.5 + 0.5)*V.w;
+      cy = (1 - (p.y*0.5 + 0.5))*V.h;
+      const sc = (V.h/2)/(tanH*dist);          // px per world unit
+      sw = r.w*U*sc; sh = r.h*U*sc;
+    }
+    /* keep the layer cheap: only what is on screen stays in the hit tree */
+    if (cy + sh/2 < -60 || cy - sh/2 > V.h + 60){ r.el.style.display = 'none'; continue; }
+    const st = r.el.style;
+    st.display = 'block';
+    st.left = (cx - sw/2).toFixed(1)+'px';
+    st.top  = (cy - sh/2).toFixed(1)+'px';
+    st.width = sw.toFixed(1)+'px';
+    st.height = sh.toFixed(1)+'px';
+    if (r.dd){
+      r.dd.style.left = Math.round(clamp(cx - r.dd.offsetWidth/2, 12,
+                                         V.w - r.dd.offsetWidth - 12))+'px';
+      r.dd.style.top  = Math.round(cy + sh/2 + 10)+'px';
+    }
+  }
+}
+
+/* hover easing, matched to the reference's `duration-150 ease-in-out` */
+function stepHovers(dt){
+  for (let i=0;i<HITS.length;i++){
+    const r = HITS[i];
+    if (r.hv === r.want && (r.hv === 0 || r.hv === 1)) continue;
+    r.hv = damp(r.hv, r.want, 2e-9, dt);
+    if (Math.abs(r.hv - r.want) < 0.002) r.hv = r.want;
+    if (r.on) r.on(r.hv);
+  }
+}
+
+/* responsive type scale: one 1152px design, ratio-mapped to the live column */
+let S = 1;
+const rs = v => Math.round(v*S*100)/100;
+
+/* ##S07-NAV ================================================================
+   The header is a floating bar rather than a full-bleed strip: it sits flush
+   under the gradient rule at rest, and once the page has moved past 10px it
+   detaches — narrowing, shortening, lifting away from the top edge, and
+   picking up a border, a shadow and a translucent fill. All of that is one
+   eased scalar, `NAV.t`, so every property crosses together.
+
+   The controls are unchanged: the outlined Docs pill and the dark Try it
+   button with its travelling gradient keep their exact colour and shape.
+   ======================================================================== */
+const NAV = {t:0, want:0, open:false, links:[], parts:{}, W:0, H:0};
+
+function hamburgerTex(open){
+  const S = 22, {c,x} = newCanvas(S,S);
+  x.strokeStyle = T.ink; x.lineWidth = 1.8; x.lineCap = 'round';
+  x.beginPath();
+  if (open){
+    x.moveTo(6,6); x.lineTo(16,16); x.moveTo(16,6); x.lineTo(6,16);
+  } else {
+    x.moveTo(5,8);  x.lineTo(17,8);
+    x.moveTo(5,14); x.lineTo(17,14);
+  }
+  x.stroke();
+  return canvasTex(c);
+}
+
+/* Product and Resources are never real anchors in the source — always
+   disclosure triggers over a set of children — so a flat link here would
+   point nowhere real. The sheet has no room for a hover flyout, so their
+   children are flattened in-place under a small label instead, the same
+   pattern the desktop dropdown already uses for its own separator row. */
+const NAV_GROUPS = [
+  {label:'Product',   items:[['Tracking','Tracking'],['Transactions','Transactions'],
+                              ['Budgeting','Budgeting'],['Assistant','Assistant']]},
+  {label:'Resources', items:[['Try our tools','Try our tools'],['Documentation','Documentation'],
+                              ['Join Community','Join Community'],['Self-Host','Self-Host']]},
+];
+
+function buildMobileSheet(){
+  const el = document.getElementById('mmenu');
+  el.innerHTML = '';
+  const grp = document.createElement('div'); grp.className = 'grp scroll';
+  COPY.nav.forEach(label=>{
+    const known = NAV_GROUPS.find(g=>g.label===label);
+    if (known){
+      const h = document.createElement('div'); h.className='sep'; h.textContent = known.label;
+      grp.appendChild(h);
+      known.items.forEach(([t,k])=>{
+        const a = document.createElement('a');
+        a.textContent = t; setLinkDestination(a, k);
+        grp.appendChild(a);
+      });
+      return;
+    }
+    const a = document.createElement('a');
+    a.textContent = label; setLinkDestination(a, label);
+    grp.appendChild(a);
+  });
+  const foot = document.createElement('div'); foot.className = 'grp';
+  [['Docs','Docs','out'],['🚀 Try it','try','pri']].forEach(([t,k,cls])=>{
+    const a = document.createElement('a');
+    a.textContent = t; setLinkDestination(a, k); a.className = cls;
+    foot.appendChild(a);
+  });
+  el.appendChild(grp); el.appendChild(foot);
+  return el;
+}
+
+function setNavOpen(v){
+  NAV.open = v;
+  const el = document.getElementById('mmenu');
+  el.classList.toggle('on', v);
+  el.setAttribute('aria-hidden', v ? 'false' : 'true');
+  document.body.style.overflow = v ? 'hidden' : '';
+  if (NAV.parts.burger){
+    NAV.parts.burger.userData.icon.material.map = v ? NAV.parts.burger.userData.texOpen
+                                                    : NAV.parts.burger.userData.texShut;
+    NAV.parts.burger.userData.icon.material.needsUpdate = true;
+  }
+}
+
+function buildNav(){
+  navRoot.clear();
+  navRoot.scale.setScalar(1/U);          // author in px, render in px
+  overlay.clear(); overlay.add(navRoot);
+  overlay.add(new THREE.AmbientLight(0xffffff, 0.62));
+  const l = new THREE.DirectionalLight(0xffffff, 0.5); l.position.set(-2,3,6);
+  overlay.add(l, l.target);
+
+  NAV.links = []; NAV.parts = {}; NAV.t = 0; NAV.want = 0;
+  setNavOpen(false);
+  buildMobileSheet();
+
+  /* the gradient rule stays pinned to the very top of the viewport */
+  const strip = new THREE.Mesh(new THREE.PlaneGeometry(px(V.w), px(M.stripH)), stripMaterial());
+  strip.position.y = px(V.h/2 - M.stripH/2);
+  strip.renderOrder = 20; navRoot.add(strip);
+  ANIM.push(t=>{ strip.material.uniforms.t.value = t; });
+
+  /* bar chrome, built at its widest and scaled down as it detaches */
+  const BW = Math.min(1024, V.w - 32), BH = 56, R = 10;
+  NAV.parts.shadow = shadowMesh(BW, BH, R, 26, .10, 6);
+  NAV.parts.shadow.material.opacity = 0; NAV.parts.shadow.renderOrder = 8;
+  NAV.parts.border = new THREE.Mesh(roundedPlaneGeo(px(BW+2), px(BH+2), px(R+1)),
+    new THREE.MeshBasicMaterial({color:0xE4E4E4, transparent:true, opacity:0, toneMapped:false}));
+  NAV.parts.border.renderOrder = 9;
+  NAV.parts.fill = new THREE.Mesh(roundedPlaneGeo(px(BW), px(BH), px(R)),
+    new THREE.MeshBasicMaterial({color:0xF7F7F7, transparent:true, opacity:0, toneMapped:false}));
+  NAV.parts.fill.renderOrder = 9;
+  navRoot.add(NAV.parts.shadow, NAV.parts.border, NAV.parts.fill);
+
+  /* wordmark */
+  const lk = wordCanvas(20, BRAND.ink);
+  const wmH = 22, wmW = wmH*(lk.w/lk.h);
+  const wm = new THREE.Mesh(new THREE.PlaneGeometry(px(wmW),px(wmH)), matInk(canvasTex(lk.canvas)));
+  wm.renderOrder = 12; navRoot.add(wm);
+  NAV.parts.wm = wm; NAV.parts.wmSize = {w:wmW, h:wmH};
+  hitFor(wm, wmW, wmH, 'home', {screen:true, label:'Founder Finance home', on:inkHover(wm)});
+
+  if (!V.mobile){
+    /* ghost links: a soft pill fades in behind the label on hover, the way the
+       component's ghost button variant does */
+    COPY.nav.forEach((label,i)=>{
+      const ts = typeset({runs:[{s:label + (i<2?'  ⌄':''), size:14, weight:500, color:'#3E3E3E'}], pad:3});
+      const w = ts.w + 22, h = 32;
+      const pill = new THREE.Mesh(roundedPlaneGeo(px(w),px(h),px(7)),
+        new THREE.MeshBasicMaterial({color:0xE9E9E9, transparent:true, opacity:0, toneMapped:false}));
+      pill.renderOrder = 10;
+      const lab = new THREE.Mesh(new THREE.PlaneGeometry(px(ts.w),px(ts.h)),
+                                 matInk(canvasTex(ts.canvas)));
+      lab.renderOrder = 12;
+      navRoot.add(pill, lab);
+      const rec = hitFor(lab, w, h, label, {screen:true, on:inkHover(lab), trigger: i < 2});
+      if (i === 0) dropdownFor(rec, {wide:true, items:[
+        {t:'Tracking',     k:'Tracking',     d:'Link all your assets and debts'},
+        {t:'Transactions', k:'Transactions', d:'Edit and automate transactions effortlessly.'},
+        {t:'Budgeting',    k:'Budgeting',    d:'Set limits, track budgets, and optimize finances.'},
+        {t:'Assistant',    k:'Assistant',    d:'Ask anything, get answers fast.'},
+      ]});
+      if (i === 1) dropdownFor(rec, {items:[
+        {t:'Try our tools', k:'Try our tools'},
+        {sep:'Links'},
+        {t:'Documentation',  k:'Documentation'},
+        {t:'Join Community', k:'Join Community'},
+        {t:'Self-Host',      k:'Self-Host'},
+        {t:'GitHub',         k:'GitHub'},
+      ]});
+      NAV.links.push({pill, lab, rec, w, h});
+    });
+
+    const docs = ghostPill('Docs', {h:30, size:13, px:14});
+    docs.traverse(o=>{ o.renderOrder = 12; });
+    navRoot.add(docs);
+    hitFor(docs, docs.userData.size.w, docs.userData.size.h, 'Docs',
+           {screen:true, on:inkHover(docs.userData.label)});
+    NAV.parts.docs = docs;
+
+    const tryPill = pillButton('🚀 Try it  ›', {h:30, size:13, px:14, depth:2.4, blur:14, alpha:.14});
+    tryPill.traverse(o=>{ o.renderOrder = 12; });
+    navRoot.add(tryPill);
+    hitFor(tryPill, tryPill.userData.size.w, tryPill.userData.size.h, 'try',
+           {screen:true, label:'Try it', on:liftHover(tryPill, 1, 1.6)});
+    NAV.parts.try = tryPill;
+  } else {
+    /* compact: one outlined icon button that toggles the sheet */
+    const b = new THREE.Group();
+    const size = 34;
+    const ring = new THREE.Mesh(roundedPlaneGeo(px(size),px(size),px(8)),
+      new THREE.MeshBasicMaterial({color:0xE2E2E2, toneMapped:false}));
+    const face = new THREE.Mesh(roundedPlaneGeo(px(size-2),px(size-2),px(7)),
+      new THREE.MeshBasicMaterial({color:0xFDFDFD, toneMapped:false}));
+    face.position.z = px(0.1);
+    const texShut = hamburgerTex(false), texOpen = hamburgerTex(true);
+    const icon = new THREE.Mesh(new THREE.PlaneGeometry(px(20),px(20)), matInk(texShut));
+    icon.position.z = px(0.2);
+    b.add(ring, face, icon);
+    b.traverse(o=>{ o.renderOrder = 12; });
+    b.userData = {icon, texShut, texOpen, size:{w:size,h:size}};
+    navRoot.add(b);
+    NAV.parts.burger = b;
+
+    const rec = hitFor(b, size, size, 'menu', {screen:true, label:'Menu', trigger:true});
+    rec.el.addEventListener('click', e=>{ e.preventDefault(); setNavOpen(!NAV.open); });
+    rec.el.addEventListener('keydown', e=>{
+      if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); setNavOpen(!NAV.open); }
+      if (e.key === 'Escape') setNavOpen(false);
+    });
+  }
+
+  layoutNav(0);
+}
+
+/* ##NAV LAYOUT — every frame, from the single eased scalar */
+function layoutNav(t){
+  const e = easeOutCubic(t);
+  const W = lerp(Math.min(1024, V.w-32), Math.min(896, V.w-32), e);
+  const H = lerp(56, 48, e);
+  const topEdge = V.h/2 - lerp(M.stripH, 16, e);
+  const cy = topEdge - H/2;
+  const padX = lerp(16, 10, e);
+  NAV.W = W; NAV.H = H;
+
+  const P = NAV.parts;
+  const BW = Math.min(1024, V.w-32), BH = 56;
+  [P.shadow, P.border, P.fill].forEach(m=>{
+    if (!m) return;
+    m.position.set(0, px(cy), px(-0.4));
+    m.scale.set(W/BW, H/BH, 1);
+  });
+  P.fill.material.opacity   = 0.62*e;
+  P.border.material.opacity = 0.95*e;
+  P.shadow.material.opacity = 0.85*e;
+  /* the sheet hangs off the bar's lower edge */
+  const sheet = document.getElementById('mmenu');
+  if (sheet) sheet.style.top = Math.round(V.h/2 - (topEdge - H)) + 'px';
+
+  if (P.wm) P.wm.position.set(px(-W/2 + padX + P.wmSize.w/2), px(cy), px(1));
+
+  if (!V.mobile){
+    const gap = 8;
+    let x = W/2 - padX;                       // pack from the right edge inward
+    if (P.try){
+      const w = P.try.userData.size.w;
+      P.try.position.set(px(x - w/2), px(cy), px(1)); x -= w + gap;
+    }
+    if (P.docs){
+      const w = P.docs.userData.size.w;
+      P.docs.position.set(px(x - w/2), px(cy), px(1)); x -= w + gap + 4;
+    }
+    for (let i = NAV.links.length - 1; i >= 0; i--){
+      const L = NAV.links[i];
+      const cxp = x - L.w/2;
+      L.pill.position.set(px(cxp), px(cy), px(0.5));
+      L.lab.position.set(px(cxp), px(cy), px(1));
+      L.pill.material.opacity = L.rec.hv;
+      x -= L.w;
+    }
+  } else if (P.burger){
+    P.burger.position.set(px(W/2 - padX - P.burger.userData.size.w/2), px(cy), px(1));
+  }
+}
+
+/* ##S08-HERO ===============================================================
+   The opening act: a generated market curve running behind the type, the
+   stacked brand mark, the headline, the CTA with its amber underglow, and the
+   product shot rising off the page on a real z offset.
+   ======================================================================== */
+
+/* ##MARK — the stacked lockup, rendered from the logotype rather than sliced
+   out of a supplied asset, so it scales cleanly to every size it is used at. */
+function brandMark(h){
+  const g = new THREE.Group();
+  const lk = logoCanvas(h*0.50, BRAND.ink);
+  const scale = h / lk.h;
+  const w = lk.w * scale;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(px(w), px(h)), matInk(canvasTex(lk.canvas)));
+  g.add(m);
+  g.userData.size = {w, h};
+  return g;
+}
+
+/* ##CHART — the faint net-worth curve that runs behind the hero and the final
+   CTA. Points come from the seeded series, are mapped into a pixel box, then
+   handed to the ribbon builder so the stroke is real geometry with a constant
+   screen width. Everything around it — rules, ticks, tooltip — is built the
+   same way, and the whole assembly sits behind the type on its own z plane. */
+function chartBackdrop(opts){
+  const g = new THREE.Group();
+  const W = V.w + 120, H = opts.h;
+  const N = 190;
+  const raw = series(N, opts.seed||11, 0.028, 0.55);
+  const pts = [];
+  for (let i=0;i<N;i++){
+    const x = -W/2 + (i/(N-1))*W;
+    const y = -H/2 + raw[i]*H*0.86 + H*0.07;
+    pts.push(new THREE.Vector2(px(x), px(y)));
+  }
+  const line = ribbon(pts, px(1.6), opts.line||0xDCDCDC, {prog:0, opacity:opts.op===undefined?1:opts.op});
+  g.add(line);
+
+  /* draw-on, once, as the section arrives */
+  let drawn = 0;
+  ANIM.push((t,dt)=>{ drawn = Math.min(1, drawn + dt*0.42); line.material.uniforms.prog.value = easeOutCubic(drawn); });
+
+  /* left axis: mono labels with a short tick, exactly as the reference reads */
+  if (opts.axis){
+    const labels = ['$100k','$80k','$60k','$40k','$20k'];
+    labels.forEach((s,i)=>{
+      const y = -H/2 + H*0.90 - i*(H*0.185);
+      const t = textMesh({runs:[{s, size:rs(13), weight:400, fam:'mono', color:'#C9C9C9'}]});
+      t.position.set(px(-V.w/2 + rs(58)), px(y), px(0.2));
+      g.add(t);
+      const tick = new THREE.Mesh(new THREE.PlaneGeometry(px(rs(14)), px(1)),
+                                  new THREE.MeshBasicMaterial({color:0xDFDFDF, transparent:true, opacity:.9, toneMapped:false}));
+      tick.position.set(px(-V.w/2 + rs(30)), px(y), px(0.2)); g.add(tick);
+    });
+    ['Today','Tomorrow'].forEach((s,i)=>{
+      const t = textMesh({runs:[{s, size:rs(13), weight:400, color:'#CFCFCF'}]});
+      t.position.set(px(i? V.w/2-rs(70) : -V.w/2+rs(56)), px(-H/2 + rs(26)), px(0.2));
+      g.add(t);
+    });
+  }
+
+  /* dashed rules + the floating value tooltip pinned to a point on the curve */
+  (opts.rules||[]).forEach(rx=>{
+    const r = dashRule(H*0.94, 0xE0E0E0, {dash:rs(9), opacity:.95, fade:1});
+    r.position.set(px(rx*W/2), 0, px(0.1)); g.add(r);
+  });
+
+  if (opts.tip){
+    const i  = Math.round(opts.tip.at*(N-1));
+    const tx = -W/2 + (i/(N-1))*W, ty = -H/2 + raw[i]*H*0.86 + H*0.07;
+    const cw = rs(opts.tip.w||190), ch = rs(58);
+    const card = new THREE.Group();
+    const sh = shadowMesh(cw,ch,rs(12), rs(26), .07, rs(7)); sh.position.z = px(-.4); card.add(sh);
+    card.add(flatCard(cw,ch,rs(12), matCard(T.white, .5)));
+    const t1 = textMesh({runs:[{s:opts.tip.date, size:rs(13), weight:400, fam:'mono', color:'#C6C6C6'}]});
+    const t2 = textMesh({runs:[{s:opts.tip.val,  size:rs(13), weight:400, fam:'mono', color:'#9C9C9C'},
+                               {s:'   '+opts.tip.chg, size:rs(13), weight:400, fam:'mono', color:'#9C9C9C'}]});
+    t1.position.set(px(-cw/2 + t1.userData.box.w/2 + rs(12)), px( ch*0.20), px(1));
+    t2.position.set(px(-cw/2 + t2.userData.box.w/2 + rs(12)), px(-ch*0.22), px(1));
+    card.add(t1,t2);
+    card.position.set(px(clamp(tx, -V.w/2+cw/2+16, V.w/2-cw/2-16)), px(ty + ch*0.9), px(1.2));
+    g.add(card);
+
+    const dot = new THREE.Mesh(new THREE.CircleGeometry(px(rs(4.5)), 24),
+                               new THREE.MeshBasicMaterial({color:0xDADADA, toneMapped:false}));
+    dot.position.set(px(tx), px(ty), px(0.6)); g.add(dot);
+  }
+  g.userData.size = {w:W, h:H};
+  return g;
+}
+
+/* ##RICH — the mid-section sentences that mix weights with inline vector
+   badges. The badge assets are authored at 44px tall, which is exactly the
+   optical size that sits on a ~34px line, so they drop straight in. */
+function ico(key, size){
+  const h = size*1.30, w = h*aspect(key);
+  return {img:key, w, h, dy:size*0.10, pad:size*0.14};
+}
+function richBlock(runs, opts={}){
+  const size = opts.size || rs(34);
+  return textMesh({
+    runs, size, weight:300, color:T.faint, fam:'sans',
+    lh: Math.round(size*1.38), align:'center',
+    width: opts.width || Math.min(V.col*0.80, rs(880)),
+    ls: -size*0.012,
+  });
+}
+const bold = s => ({s, weight:600, color:T.ink});
+
+/* ##FEATURE CARD — media well, then title and body beneath it on the page.
+   The well is a genuine slab so its bevel picks up the key light; the
+   screenshot is the only part of the card that comes from a file. */
+function featureCard(key, title, body, w){
+  const g = new THREE.Group();
+  const panelH = Math.round(w/0.955);
+  const p = shotPanel(key, w, rs(M.radCard), {h:panelH, cover:true, depth:2.4,
+                                              blur:rs(30), alpha:.05, drop:rs(9)});
+  p.position.y = -px(panelH/2);
+  g.add(p);
+
+  const t = textMesh({runs:[{s:title, size:rs(17), weight:550, color:T.ink}], width:w, lh:rs(24)});
+  t.position.set(px(-w/2 + t.userData.box.w/2 - t.userData.box.pad),
+                 -px(panelH + rs(26) + t.userData.box.h/2), 0);
+  const b = textMesh({runs:[{s:body, size:rs(15), weight:400, color:T.faint}],
+                      width:w, lh:rs(22)});
+  b.position.set(px(-w/2 + b.userData.box.w/2 - b.userData.box.pad),
+                 -px(panelH + rs(26) + t.userData.box.h + rs(2) + b.userData.box.h/2), 0);
+  g.add(t,b);
+  g.userData.size = {w, h: panelH + rs(26) + t.userData.box.h + rs(2) + b.userData.box.h};
+  return g;
+}
+
+/* three cards on a row (stacked on narrow viewports), each revealing on a
+   short stagger so the row assembles rather than pops */
+function cardRow(defs, top){
+  const cols = V.mobile ? 1 : 3;
+  const gap  = rs(M.cardGap);
+  const cw   = (V.col - gap*(cols-1))/cols;
+  let rowH = 0;
+  const built = defs.map(d => featureCard(d[0], d[1], d[2], cw));
+  built.forEach((c,i)=>{
+    const col = i % cols, row = Math.floor(i/cols);
+    const x = -V.col/2 + cw/2 + col*(cw+gap);
+    const yTop = top + row*(Math.max(...built.map(b=>b.userData.size.h)) + rs(48));
+    flow.pin(c, c.userData.size.h, yTop, x, 0);
+    c.position.y = -px(yTop);              // group origin is the panel top
+    c.userData.docTop = yTop;
+    world.add(c);
+    reveal(c, {dy:rs(52), dz:-rs(90), rx:0.075, head:0.95-col*0.02, tail:0.34});
+    rowH = Math.max(rowH, (yTop-top) + c.userData.size.h);
+  });
+  return rowH;
+}
+
+/* ##S08-HERO (layout) ---------------------------------------------------- */
+function sectionHero(){
+  const heroH = rs(720);
+
+  /* backdrop first so everything else stacks in front of it */
+  const chart = chartBackdrop({
+    h: heroH, seed: 11, axis:true, rules:[-0.42, 0.30], line:0xDEDEDE,
+    tip:{at:0.79, date:'27 Feb 2025', val:'$84,517.92', chg:'+$256 (+0.4%)', w:rs(200)},
+  });
+  flow.pin(chart, heroH, rs(70), 0, -6);
+  world.add(chart);
+  SCRUB.push(s=>{ chart.position.z = px(-6 - s*0.010); });   // recedes as you leave
+
+  flow.gap(rs(V.mobile?96:120));
+
+  const mark = brandMark(rs(V.mobile?86:116));
+  flow.put(mark, rs(V.mobile?86:116), {mb:rs(30), z:0.4});
+  world.add(mark); reveal(mark, {dy:rs(18), dz:-rs(40), rx:0.03, head:2, tail:1.6});
+
+  const h1s = V.mobile ? rs(40) : rs(64), h1lh = Math.round(h1s*1.19);
+  const h1 = new THREE.Group();
+  const rowsA = COPY.hero.h1.map((s,i)=> textMesh({
+    runs:[{s, size:h1s, weight:500, color:T.ink, ls:-h1s*0.021}], align:'center', width:V.col}));
+  const rowB = textMesh({runs:[{s:COPY.hero.h1dim, size:h1s, weight:500, color:T.faint, ls:-h1s*0.021}],
+                         align:'center', width:V.col});
+  [...rowsA,rowB].forEach((m,i)=>{ m.position.y = -px(i*h1lh); h1.add(m); });
+  h1.position.y = px(h1lh);                     // recentre the 3-line block
+  const h1wrap = new THREE.Group(); h1wrap.add(h1);
+  flow.put(h1wrap, h1lh*3, {mb:rs(28), z:0.4});
+  world.add(h1wrap); reveal(h1wrap, {dy:rs(26), dz:-rs(56), rx:0.035, head:2, tail:1.6});
+
+  const sub = textMesh({runs:[{s:COPY.hero.sub, size:rs(17), weight:400, color:T.muted}],
+                        align:'center', width:Math.min(V.col, rs(560)), lh:rs(26)});
+  flow.put(sub, sub.userData.box.h, {mb:rs(22), z:0.4});
+  world.add(sub); reveal(sub, {dy:rs(20), dz:-rs(40), rx:0.02, head:2, tail:1.5});
+
+  const cta = pillButton(COPY.hero.cta, {h:rs(46), size:rs(16), px:rs(22), depth:rs(4)});
+  flow.put(cta, rs(46), {mb:rs(26), z:2});
+  world.add(cta); reveal(cta, {dy:rs(16), dz:-rs(30), rx:0.02, head:2, tail:1.45});
+  hitFor(cta, cta.userData.size.w, cta.userData.size.h, 'sample',
+         {label:COPY.hero.cta, on:liftHover(cta, 2, 2.4)});
+
+  const social = new THREE.Group();
+  const d = rs(36);
+  [['github',-1],['discord',1]].forEach(([k,s])=>{
+    const b = iconDisc(k, d);
+    b.position.x = px(s*(d/2 + rs(5)));
+    social.add(b);
+    hitFor(b, d, d, k, {label:k==='github'?'GitHub':'Discord', on:liftHover(b, 0, 2.2)});
+  });
+  flow.put(social, d, {mb:rs(46), z:1});
+  world.add(social); reveal(social, {dy:rs(14), dz:-rs(26), rx:0.02, head:2, tail:1.4});
+
+  /* the product shot: pushed forward in z and given a real tilt so it reads as
+     a slab hovering over the page, then levelled out as it scrolls up */
+  const shotW = Math.min(V.w - rs(56), rs(1200));
+  const shotH = Math.round(shotW*0.66);        // crop the app window at the fold
+  const shot  = shotPanel('heroShot', shotW, rs(18), {h:shotH, cover:true, anchor:'top',
+                                                      depth:rs(5), blur:rs(60), alpha:.10,
+                                                      drop:rs(26), castShadow:true});
+  const shotTop = flow.y;
+  flow.pin(shot, shotH, shotTop, 0, 16);
+  flow.y = shotTop + shotH;
+  world.add(shot);
+  SCRUB.push(s=>{
+    const p = clamp(inv(shotTop - V.h*0.95, shotTop - V.h*0.15, s), 0, 1);
+    shot.rotation.x = (1-easeOutCubic(p)) * 0.20;
+    shot.position.z = px(16 - (1-easeOutCubic(p))*70);
+  });
+  flow.gap(rs(120));
+  HERO_END = flow.y;
+}
+
+/* ##S09-ADD / ##S10-TXN / ##S11-BUDGET =====================================
+   The three product acts share one shape: heading, hero shot, a sentence that
+   mixes weights with inline badges, then a row of cards. One builder, three
+   data sets — which is also why they stay in sync when the column resizes.
+   ======================================================================== */
+function featureAct(cfg){
+  const g0 = flow.gap(rs(cfg.padTop===undefined?110:cfg.padTop));
+
+  const h = heading(cfg.h, {size: V.mobile?rs(34):rs(56)});
+  flow.put(h, h.userData.size.h, {mb:rs(cfg.headGap===undefined?46:cfg.headGap), z:0.6});
+  world.add(h); reveal(h, {dy:rs(40), dz:-rs(70), rx:0.06});
+
+  if (cfg.shot){
+    const w = Math.min(V.col, rs(cfg.shotW||1100));
+    const s = shotPanel(cfg.shot, w, rs(14), {depth:rs(4), blur:rs(46), alpha:.07, drop:rs(18)});
+    const sh = s.userData.size.h, sTop = flow.y;
+    flow.pin(s, sh, sTop, 0, 6);
+    flow.y = sTop + sh*(cfg.shotClip||1) + rs(cfg.shotGap===undefined?54:cfg.shotGap);
+    world.add(s); reveal(s, {dy:rs(60), dz:-rs(120), rx:0.10, head:0.98, tail:0.30});
+  }
+
+  const r = richBlock(cfg.rich, {size: V.mobile?rs(24):rs(34)});
+  flow.put(r, r.userData.box.h, {mb:rs(cfg.richGap===undefined?58:cfg.richGap), z:0.6});
+  world.add(r); reveal(r, {dy:rs(34), dz:-rs(60), rx:0.05});
+
+  const rowTop = flow.y;
+  const rowH = cardRow(cfg.cards, rowTop);
+  flow.y = rowTop + rowH + rs(cfg.padBottom===undefined?96:cfg.padBottom);
+}
+
+function sectionAdd(){
+  featureAct({
+    h: COPY.add.h, shot:'addHead', shotW:580, cards:COPY.add.cards,
+    rich:[
+      'Track your ', bold('bank accounts'), ico('icBank',rs(34)), ', check how',
+      '\nyour ', bold('stocks'), ico('icStocks',rs(34)), ' and ', bold('crypto'), ico('icCrypto',rs(34)), ' are doing,',
+      '\nand monitor your ', bold('everything'), ' else', ico('icAssets',rs(34)), ' in any',
+      '\n', bold('currency'), ico('icCurr',rs(34)), ' all in one place.',
+    ],
+  });
+}
+function sectionTxn(){
+  featureAct({
+    h: COPY.txn.h, shot:'txnHead', shotW:910, cards:COPY.txn.cards,
+    rich:[
+      'Create a new ', bold('income'), ico('icAdd',rs(34)), ' ', bold('expense'), ico('icSub',rs(34)), ' or transfer',
+      '\n', ico('icFlow',rs(34)), ' ', bold('transaction'),
+      '\n\n', bold('Edit'), ' it ', ico('icPencil',rs(34)), ' add custom ', bold('categories'), ico('icBoard',rs(34)),
+      '\n', bold('merchants'), ico('icShop',rs(34)), ' and ', bold('tags'), ico('icTags',rs(34)),
+      '\n\nCreate ', bold('filters'), ico('icFilter',rs(34)), ' ', bold('Import'), ' via CSV ', ico('icImport',rs(34)),
+      '\n', bold('Link'), ' transactions ', ico('icLink',rs(34)), ' Set up ', bold('rules'), ico('icRules',rs(34)),
+      '\nand more',
+    ],
+  });
+}
+function sectionBudget(){
+  featureAct({
+    h: COPY.budget.h, shot:'budHead', shotW:575, cards:COPY.budget.cards,
+    rich:[
+      'Customize ', bold('category budgets'), ico('icCustom',rs(34)), ', set',
+      '\n', bold('smart allocations'), ico('icAlloc',rs(34)), ' and stay on top of',
+      '\n', bold('category'), ico('icCats',rs(34)),
+    ],
+    padBottom: 120,
+  });
+}
+
+/* ##S12-TRUST ==============================================================
+   Security / transparency. Three panels: an encrypted-data wall built from
+   generated binary type with real chips floating over it, a live contribution
+   grid made of instanced boxes, and the community panel — then three columns
+   of copy underneath.
+   ======================================================================== */
+
+/* binary rain, generated rather than shipped */
+function binaryWall(w,h){
+  const {c,x} = newCanvas(w,h);
+  x.fillStyle = '#F5F5F5'; x.fillRect(0,0,w,h);
+  const fs = rs(11), lh = fs*1.42, cw = fs*0.62;
+  const r = mulberry(31);
+  x.font = fontStr(400, fs, 'mono');
+  for (let row=0; row*lh < h; row++){
+    for (let col=0; col*cw < w; col++){
+      const a = 0.10 + r()*0.28;
+      x.fillStyle = 'rgba(120,120,120,'+a.toFixed(3)+')';
+      x.fillText(r()>0.5?'1':'0', col*cw, row*lh + fs);
+    }
+  }
+  /* fade the wall out at every edge so it reads as a texture, not a block */
+  const gr = x.createLinearGradient(0,0,0,h);
+  gr.addColorStop(0,'rgba(245,245,245,0)'); gr.addColorStop(.62,'rgba(245,245,245,0)');
+  gr.addColorStop(1,'rgba(245,245,245,1)');
+  x.fillStyle = gr; x.fillRect(0,0,w,h);
+  return canvasTex(c);
+}
+
+/* ##GRID — the contribution heatmap as real instanced geometry. Each cell is a
+   thin box; the colour ramp is the GitHub scale, seeded so the pattern is
+   stable, and a travelling wave lifts cells a fraction of a pixel in z. */
+function contribGrid(cols, rows, cell, gap){
+  const geo = new THREE.BoxGeometry(px(cell), px(cell), px(2.2));
+  const mat = new THREE.MeshStandardMaterial({roughness:.55, metalness:0, envMapIntensity:.5});
+  const n   = cols*rows;
+  const mesh = new THREE.InstancedMesh(geo, mat, n);
+  mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  const ramp = [0xEBEDEF,0xC6E6C0,0x9BD48C,0x63B857,0x2E8B33].map(c=>new THREE.Color(c));
+  const r = mulberry(19);
+  const lvl = new Float32Array(n);
+  const dummy = new THREE.Object3D();
+  const W = cols*(cell+gap)-gap, H = rows*(cell+gap)-gap;
+  for (let i=0;i<n;i++){
+    const cx = i % cols, cy = (i/cols)|0;
+    const v = r();
+    const l = v<.30?0 : v<.52?1 : v<.72?2 : v<.90?3 : 4;
+    lvl[i] = l;
+    mesh.setColorAt(i, ramp[l]);
+    dummy.position.set(px(-W/2 + cx*(cell+gap) + cell/2), px(H/2 - cy*(cell+gap) - cell/2), 0);
+    dummy.updateMatrix(); mesh.setMatrixAt(i, dummy.matrix);
+  }
+  mesh.instanceColor.needsUpdate = true;
+  ANIM.push(t=>{
+    for (let i=0;i<n;i++){
+      const cx = i % cols, cy = (i/cols)|0;
+      const wv = Math.sin(t*1.5 - cx*0.22 - cy*0.16);
+      dummy.position.set(px(-W/2 + cx*(cell+gap) + cell/2), px(H/2 - cy*(cell+gap) - cell/2),
+                         px(lvl[i]>0 ? 1.2 + wv*1.1*(lvl[i]/4) : 0));
+      dummy.updateMatrix(); mesh.setMatrixAt(i, dummy.matrix);
+    }
+    mesh.instanceMatrix.needsUpdate = true;
+  });
+  mesh.userData.size = {w:W, h:H};
+  return mesh;
+}
+
+/* small glyph badges for the three trust columns, drawn as vector paths */
+function trustGlyph(kind, size){
+  const {c,x} = newCanvas(size,size);
+  x.strokeStyle = T.ink; x.lineWidth = size*0.055;
+  x.lineCap = 'round'; x.lineJoin = 'round';
+  const s = size, k = s*0.5;
+  if (kind === 'lock'){
+    x.strokeRect(s*0.30, s*0.46, s*0.40, s*0.30);
+    x.beginPath(); x.arc(k, s*0.46, s*0.13, Math.PI, 0); x.stroke();
+  } else if (kind === 'code'){
+    x.beginPath();
+    x.moveTo(s*0.40,s*0.36); x.lineTo(s*0.26,s*0.50); x.lineTo(s*0.40,s*0.64);
+    x.moveTo(s*0.60,s*0.36); x.lineTo(s*0.74,s*0.50); x.lineTo(s*0.60,s*0.64);
+    x.stroke();
+  } else {
+    x.beginPath();
+    x.moveTo(k, s*0.68);
+    x.bezierCurveTo(s*0.20,s*0.54, s*0.24,s*0.34, s*0.38,s*0.34);
+    x.bezierCurveTo(s*0.46,s*0.34, k,s*0.41, k,s*0.45);
+    x.bezierCurveTo(k,s*0.41, s*0.54,s*0.34, s*0.62,s*0.34);
+    x.bezierCurveTo(s*0.76,s*0.34, s*0.80,s*0.54, k,s*0.68);
+    x.stroke();
+  }
+  return canvasTex(c);
+}
+
+function sectionTrust(){
+  const top0 = flow.gap(rs(30));
+  const bandTop = flow.y;
+
+  flow.gap(rs(110));
+  const h = heading(COPY.trust.h, {size: V.mobile?rs(32):rs(52)});
+  flow.put(h, h.userData.size.h, {mb:rs(58), z:0.6});
+  world.add(h); reveal(h, {dy:rs(40), dz:-rs(70), rx:0.06});
+
+  const cols = V.mobile ? 1 : 3;
+  const gap  = rs(M.cardGap);
+  const cw   = (V.col - gap*(cols-1))/cols;
+  const panelH = rs(230);
+  const rowTop = flow.y;
+
+  /* -- panel 1: encrypted wall + floating chips ------------------------- */
+  const p1 = new THREE.Group();
+  const wall = new THREE.Mesh(new THREE.PlaneGeometry(px(cw), px(panelH)),
+                              matInk(binaryWall(cw, panelH), {opacity:.9}));
+  p1.add(wall);
+  COPY.trust.pills.forEach((s,i)=>{
+    const chip = ghostPill(s, {h:rs(28), size:rs(12.5), px:rs(11), fam:'mono', color:'#4A4A4A'});
+    chip.position.set(px(-cw/2 + chip.userData.size.w/2 + rs(14) + (i%2)*rs(6)),
+                      px(panelH/2 - rs(56) - i*rs(34)), px(2 + i*0.4));
+    const s0 = chip.position.y;
+    ANIM.push(t=>{ chip.position.y = s0 + px(Math.sin(t*0.9 + i*0.7)*2.0); });
+    p1.add(chip);
+  });
+
+  /* -- panel 2: the contribution grid + repo chip ------------------------ */
+  const p2 = new THREE.Group();
+  const cell = rs(V.mobile?11:12.5), cgap = rs(3.2);
+  const gcols = Math.max(8, Math.floor((cw - rs(30)) / (cell+cgap)));
+  const grows = Math.max(6, Math.floor((panelH - rs(40)) / (cell+cgap)));
+  const grid = contribGrid(gcols, grows, cell, cgap);
+  grid.position.y = px(rs(6));
+  p2.add(grid);
+  const repo = ghostPill('finance-tracker', {h:rs(30), size:rs(13), px:rs(12), lead:rs(20)});
+  repo.position.set(0, px(-rs(8)), px(8));
+  hitFor(repo, repo.userData.size.w, repo.userData.size.h, 'GitHub', {label:'Founder Finance on GitHub'});
+  const gh = assetTex('github');
+  if (gh){
+    const ic = new THREE.Mesh(new THREE.PlaneGeometry(px(rs(14)),px(rs(14))), matInk(gh));
+    ic.position.set(px(-repo.userData.size.w/2 + rs(15)), 0, px(0.2));
+    repo.add(ic);
+  }
+  p2.add(repo);
+  ANIM.push(t=>{ repo.position.z = px(8 + Math.sin(t*1.1)*1.4); });
+
+  /* -- panel 3: community ------------------------------------------------ */
+  const p3 = new THREE.Group();
+  const pat = shotPanel('trPublic', cw, rs(M.radCard), {h:panelH, cover:true, depth:1.2, shadow:false});
+  pat.children.forEach(o=>{ if(o.material){ o.material.transparent = true; o.material.opacity = .30; }});
+  p3.add(pat);
+  const join = ghostPill('Join community', {h:rs(34), size:rs(14), px:rs(14), lead:rs(22)});
+  const dc = assetTex('discord');
+  if (dc){
+    const ic = new THREE.Mesh(new THREE.PlaneGeometry(px(rs(15)),px(rs(15))), matInk(dc));
+    ic.position.set(px(-join.userData.size.w/2 + rs(16)), 0, px(0.2));
+    join.add(ic);
+  }
+  join.position.z = px(8);
+  p3.add(join);
+  hitFor(join, join.userData.size.w, join.userData.size.h, 'Join Community');
+  ANIM.push(t=>{ join.position.y = px(Math.sin(t*0.8)*2.4); });
+
+  [p1,p2,p3].slice(0,cols===1?3:3).forEach((p,i)=>{
+    const col = i % cols, row = (i/cols)|0;
+    p.position.x = px(-V.col/2 + cw/2 + col*(cw+gap));
+    const t = rowTop + row*(panelH + rs(36));
+    flow.pin(p, panelH, t, (-V.col/2 + cw/2 + col*(cw+gap)), 0);
+    world.add(p); reveal(p, {dy:rs(46), dz:-rs(80), rx:0.07, head:0.95-col*0.02});
+  });
+  flow.y = rowTop + panelH*(cols===1?3:1) + (cols===1?rs(72):0) + rs(52);
+
+  /* -- three columns of copy -------------------------------------------- */
+  const colTop = flow.y;
+  let colH = 0;
+  COPY.trust.cols.forEach((c,i)=>{
+    const col = i % cols, row = (i/cols)|0;
+    const g = new THREE.Group();
+    const badge = new THREE.Group();
+    const disc = flatCard(rs(34), rs(34), rs(17), matCard(T.white,.5));
+    const gl = new THREE.Mesh(new THREE.PlaneGeometry(px(rs(34)),px(rs(34))), matInk(trustGlyph(c[0], 34)));
+    gl.position.z = px(0.4);
+    badge.add(shadowMesh(rs(34),rs(34),rs(17),rs(14),.10,rs(4)), disc, gl);
+    badge.position.y = -px(rs(17));
+    g.add(badge);
+    const t = textMesh({runs:[{s:c[1], size:rs(16), weight:600, color:T.ink}], width:cw, lh:rs(24)});
+    t.position.set(px(-cw/2 + t.userData.box.w/2 - t.userData.box.pad), -px(rs(58) + t.userData.box.h/2), 0);
+    const b = textMesh({runs:[{s:c[2], size:rs(15), weight:400, color:T.muted}], width:cw, lh:rs(23)});
+    b.position.set(px(-cw/2 + b.userData.box.w/2 - b.userData.box.pad),
+                   -px(rs(58) + t.userData.box.h + rs(4) + b.userData.box.h/2), 0);
+    const linkY = rs(58) + t.userData.box.h + rs(4) + b.userData.box.h + rs(22);
+    const lk = textMesh({runs:[{s:c[3]+'  ↗', size:rs(15), weight:500, color:T.ink}], width:cw, lh:rs(22)});
+    lk.position.set(px(-cw/2 + lk.userData.box.w/2 - lk.userData.box.pad), -px(linkY + lk.userData.box.h/2), 0);
+    g.add(t,b,lk);
+    hitFor(lk, lk.userData.box.w, lk.userData.box.h, c[3], {label:c[3]});
+    const gh2 = linkY + lk.userData.box.h;
+    flow.pin(g, gh2, colTop + row*(gh2 + rs(40)), (-V.col/2 + cw/2 + col*(cw+gap)), 0);
+    g.position.y = -px(colTop + row*(gh2 + rs(40)));
+    world.add(g); reveal(g, {dy:rs(40), dz:-rs(70), rx:0.06, head:0.95-col*0.02});
+    colH = Math.max(colH, (row+1)*(gh2 + rs(40)));
+  });
+  flow.y = colTop + colH + rs(70);
+
+  band(bandTop, flow.y - bandTop, T.bgAlt, 0);
+  return bandTop;
+}
+
+/* ##S13-AI =================================================================
+   The dark act. One large slab with its own gradient/dither shader and its own
+   warm point light, so the whole thing genuinely changes lighting rather than
+   just changing colour. Two marquees run underneath on independent speeds.
+   ======================================================================== */
+function marquee(items, y, opts){
+  const g = new THREE.Group();
+  const gap = opts.gap, h = opts.h;
+  let x = 0;
+  const made = [];
+  /* One pass of the sequence is `span` wide, and wrapping moves the strip by
+     exactly one span. Two copies are only enough when a single span already
+     covers the viewport — otherwise the wrap opens a hole, which is what left
+     the dead space on the right of the answer row. Lay down as many copies as
+     it takes to cover the visible width plus the one span the wrap consumes. */
+  let span1 = 0;
+  items.forEach(k => { span1 += (IMG[k] ? h*aspect(k) : 0) + gap; });
+  const passes = Math.max(2, Math.ceil((opts.cover || 0) / Math.max(span1, 1)) + 2);
+  for (let pass=0; pass<passes; pass++){
+    items.forEach(k=>{
+      const t = assetTex(k);
+      const w = h*aspect(k);
+      if (t){
+        const mat = matInk(t);
+        if (opts.clip) mat.clippingPlanes = opts.clip;
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(px(w),px(h)), mat);
+        m.position.x = px(x + w/2);
+        g.add(m); made.push(m);
+      }
+      x += w + gap;
+    });
+  }
+  const span = x/passes;
+  g.position.y = px(y);
+  const dir = opts.dir || 1, sp = opts.speed || 26;
+  ANIM.push((t,dt)=>{
+    let p = (g.position.x/U) - dir*sp*dt;
+    if (dir > 0 && p < -span) p += span;
+    if (dir < 0 && p >  0)    p -= span;
+    g.position.x = px(p);
+  });
+  g.position.x = px(dir>0 ? 0 : -span);
+  return g;
+}
+
+function sectionAI(){
+  flow.gap(rs(40));
+  const pad   = V.mobile ? rs(10) : rs(22);
+  const slabW = V.w - pad*2;
+  const slabH = rs(V.mobile ? 1180 : 1060);
+  const top   = flow.y;
+
+  const root = new THREE.Group();
+  const slab = new THREE.Mesh(roundedSlabGeo(px(slabW), px(slabH), px(rs(26)), px(rs(6))),
+                              darkSlabMaterial());
+  root.add(slab);
+  ANIM.push(t=>{ slab.material.uniforms.t.value = t; });
+
+  /* warm key inside the slab: it lights the chips and the prompt panel */
+  const warm = new THREE.PointLight(0xF15B29, 2.2, px(900), 2);
+  warm.position.set(0, px(slabH*0.34), px(90));
+  root.add(warm);
+
+  const top0 = slabH/2;                       // slab-local y of its top edge
+  let y = top0 - rs(90);
+
+  /* glowing assistant mark */
+  const badge = new THREE.Group();
+  const glow = new THREE.Mesh(new THREE.PlaneGeometry(px(rs(200)),px(rs(200))),
+                              glowMaterial(0xF1802A, .55, 2.4));
+  glow.position.z = px(2); badge.add(glow);
+  const ring = flatCard(rs(46), rs(46), rs(13), new THREE.MeshBasicMaterial({color:0x2A1B12, toneMapped:false}));
+  ring.position.z = px(3); badge.add(ring);
+  {
+    /* the app tile carries the lockup in a light ink so it reads on the slab */
+    const lk = logoCanvas(rs(9), '#E8E8E8');
+    const w = rs(34), h = w*(lk.h/lk.w);
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(px(w),px(h)), matInk(canvasTex(lk.canvas)));
+    m.position.z = px(4); badge.add(m);
+  }
+  badge.position.set(0, px(y - rs(23)), px(6));
+  ANIM.push(t=>{ glow.material.uniforms.t.value = t;
+                 badge.position.z = px(6 + Math.sin(t*0.9)*2); });
+  root.add(badge);
+  y -= rs(46) + rs(46);
+
+  /* headline, white over dim */
+  const hs = V.mobile ? rs(34) : rs(54), hlh = Math.round(hs*1.18);
+  [[COPY.ai.h[0], T.onDark],[COPY.ai.h[1], T.onDarkDim]].forEach((r,i)=>{
+    const m = textMesh({runs:[{s:r[0], size:hs, weight:500, color:r[1], ls:-hs*0.02}],
+                        align:'center', width:V.col});
+    m.position.set(0, px(y - hlh/2 - i*hlh), px(4));
+    root.add(m);
+  });
+  y -= hlh*2 + rs(34);
+
+  /* the prompt panel from the assistant asset, floated forward */
+  const pw = Math.min(rs(520), slabW*0.8), ph = pw*122/484;
+  const pt = assetTex('aiPrompt');
+  if (pt){
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(px(pw),px(ph)), matInk(pt));
+    p.position.set(0, px(y - ph/2), px(14));
+    root.add(p);
+    ANIM.push(t=>{ p.position.z = px(14 + Math.sin(t*0.7+1.2)*2.2); });
+  }
+  y -= ph + rs(56);
+
+  /* the "ask anything like … and get answered, really fast." sentence, with
+     the real prompt chips set inline on the baseline */
+  const fs = V.mobile ? rs(22) : rs(34);
+  const chip = k => ({img:k, w:(fs*1.62)*aspect(k), h:fs*1.62, dy:fs*0.14, pad:fs*0.16});
+  const ask = textMesh({
+    runs:[
+      /* breaks are set by hand so the three lines stay balanced around the
+         centre line, the way the reference sets them — leaving it to the
+         wrapper strands a single chip on a line of its own */
+      {s:'Ask ', size:fs, weight:300, color:T.onDarkDim},
+      {s:'anything', size:fs, weight:600, color:T.onDark},
+      {s:' like ', size:fs, weight:300, color:T.onDarkDim},
+      chip('aiPortf'),
+      {s:' or\n', size:fs, weight:300, color:T.onDarkDim},
+      chip('aiUnusual'),
+      {s:' or\u00A0even ', size:fs, weight:400, color:T.onDark},
+      chip('aiSim'),
+      {s:'\nand get answered, ', size:fs, weight:300, color:T.onDarkDim},
+      {s:'really fast.', size:fs, weight:600, color:T.onDark},
+    ],
+    align:'center', width: Math.min(slabW - rs(80), rs(1080)), lh: Math.round(fs*1.66),
+  });
+  ask.position.set(0, px(y - ask.userData.box.h/2), px(4));
+  root.add(ask);
+  y -= ask.userData.box.h + rs(60);
+
+  /* explore link */
+  const ex = new THREE.Group();
+  const exT = textMesh({runs:[{s:COPY.ai.link, size:rs(17), weight:500, color:T.onDark}]});
+  const exD = flatCard(rs(30), rs(30), rs(15), new THREE.MeshBasicMaterial({color:0x2B2B2B, toneMapped:false}));
+  const exA = textMesh({runs:[{s:'↗', size:rs(14), weight:500, color:T.onDark}]});
+  exT.position.x = -px(rs(20));
+  exD.position.x =  px(exT.userData.box.w/2 - rs(20) + rs(22));
+  exA.position.set(exD.position.x, 0, px(1));
+  ex.add(exT, exD, exA);
+  ex.position.set(0, px(y - rs(15)), px(4));
+  root.add(ex);
+  hitFor(ex, exT.userData.box.w + rs(56), rs(38), 'Explore Founder Finance AI',
+         {label:'Explore Founder Finance AI'});
+  y -= rs(30) + rs(62);
+
+  /* two marquees: prompt chips, then the answers they produce */
+  /* world-space planes at the slab's inner edges. The slab never moves in x,
+     so a static pair is all the clipping the marquees need. */
+  const half = px(slabW/2 - rs(2));
+  const clip = [ new THREE.Plane(new THREE.Vector3( 1,0,0), half),
+                 new THREE.Plane(new THREE.Vector3(-1,0,0), half) ];
+
+  const chipsH = rs(V.mobile?42:52);
+  const mq1 = marquee(['aiCompare','aiPattern','aiSumm','aiForecast','aiAnalyze','aiPortf'],
+                      y - chipsH/2, {h:chipsH, gap:rs(22), dir:1, speed:rs(30), clip, cover:slabW});
+  mq1.position.z = px(4); root.add(mq1);
+  y -= chipsH + rs(34);
+
+  const cardsH = rs(V.mobile?210:280);
+  const mq2 = marquee(['aiSpent','aiStocks','aiSpentBar','aiStocksC'],
+                      y - cardsH/2, {h:cardsH, gap:rs(22), dir:-1, speed:rs(20), clip, cover:slabW});
+  mq2.position.z = px(4); root.add(mq2);
+
+  flow.pin(root, slabH, top, 0, 4);
+  world.add(root);
+  reveal(root, {dy:rs(60), dz:-rs(120), rx:0.05, head:0.98, tail:0.42, op:1});
+  flow.y = top + slabH + rs(110);
+}
+
+/* ##S14-CTA ================================================================ */
+function sectionCTA(){
+  const h = rs(560);
+  const chart = chartBackdrop({h, seed:47, axis:false, rules:[-0.44], line:0xE2E2E2, op:.95,
+                               tip:{at:0.28, date:'10 Mar 2025', val:'$65,818.45', chg:'+$394.91 (+0.6%)', w:rs(210)}});
+  flow.pin(chart, h, flow.y, 0, -6);
+  world.add(chart);
+
+  flow.gap(rs(96));
+  const mark = brandMark(rs(V.mobile?70:94));
+  flow.put(mark, rs(V.mobile?70:94), {mb:rs(22), z:0.4});
+  world.add(mark); reveal(mark, {dy:rs(24), dz:-rs(50), rx:0.04});
+
+  const hs = V.mobile ? rs(34) : rs(50), hlh = Math.round(hs*1.2);
+  const g = new THREE.Group();
+  COPY.cta.h.forEach((s,i)=>{
+    const m = textMesh({runs:[{s, size:hs, weight:500, color:T.ink, ls:-hs*0.02}],
+                        align:'center', width:V.col});
+    m.position.y = -px(i*hlh); g.add(m);
+  });
+  g.position.y = px(hlh/2);
+  const wrap = new THREE.Group(); wrap.add(g);
+  flow.put(wrap, hlh*2, {mb:rs(16), z:0.4});
+  world.add(wrap); reveal(wrap, {dy:rs(30), dz:-rs(60), rx:0.05});
+
+  const sub = textMesh({runs:[{s:COPY.cta.sub, size:rs(16), weight:400, color:T.muted}],
+                        align:'center', width:V.col});
+  flow.put(sub, sub.userData.box.h, {mb:rs(26), z:0.4});
+  world.add(sub); reveal(sub, {dy:rs(20), dz:-rs(40), rx:0.03});
+
+  const cta = pillButton(COPY.hero.cta, {h:rs(46), size:rs(16), px:rs(22), depth:rs(4)});
+  flow.put(cta, rs(46), {mb:rs(110), z:2});
+  world.add(cta); reveal(cta, {dy:rs(16), dz:-rs(30), rx:0.02});
+  hitFor(cta, cta.userData.size.w, cta.userData.size.h, 'sample',
+         {label:COPY.hero.cta});
+}
+
+/* ##S15-FOOTER ============================================================= */
+function sectionFooter(){
+  const top = flow.y;
+  flow.gap(rs(64));
+
+  const left = -V.col/2;
+  {
+    const lk = wordCanvas(rs(22), BRAND.ink);
+    const h = rs(27), w = h*(lk.w/lk.h);
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(px(w),px(h)), matInk(canvasTex(lk.canvas)));
+    flow.pin(m, h, flow.y, left + w/2, 0.4);
+    world.add(m); reveal(m, {dy:rs(24), dz:-rs(40), rx:0.03});
+    hitFor(m, w, h, 'home', {label:'Founder Finance home'});
+  }
+  const tag = textMesh({runs:[{s:COPY.footer.tag, size:rs(14), weight:400, color:T.muted}],
+                        width:rs(240), lh:rs(21)});
+  flow.pin(tag, tag.userData.box.h, flow.y + rs(44), left + tag.userData.box.w/2 - tag.userData.box.pad, 0.4);
+  world.add(tag); reveal(tag, {dy:rs(20), dz:-rs(36), rx:0.03});
+
+  /* Link columns. Heights are measured, not assumed: on a narrow viewport the
+     Tools column is five links deep and would otherwise run into whatever the
+     next row places beneath it. Each column is measured first, then rows are
+     stacked from the tallest column in the row above. */
+  const cols2    = V.mobile ? 2 : 4;
+  const brandBot = flow.y + rs(44) + tag.userData.box.h + rs(34);
+  const colTop0  = V.mobile ? brandBot : flow.y;
+  const colStart = V.mobile ? left : left + rs(320);
+  const colW     = V.mobile ? (V.col - rs(20))/2 : (V.col - rs(320))/4;
+
+  const blocks = COPY.footer.cols.map(c=>{
+    const parts = [];
+    const head = textMesh({runs:[{s:c[0].toUpperCase(), size:rs(11.5), weight:600,
+                                  color:'#8A8A8A', ls:rs(0.9)}], width:colW});
+    parts.push({m:head, dy:0});
+    let yy = rs(28);
+    c[1].forEach(s=>{
+      const l = textMesh({runs:[{s, size:rs(14), weight:400, color:T.muted}],
+                          width:colW-rs(14), lh:rs(19)});
+      parts.push({m:l, dy:yy, k:s});
+      yy += l.userData.box.h + rs(2);
+    });
+    return {parts, h:yy};
+  });
+
+  let deepest = colTop0;
+  const rowTops = [colTop0];
+  for (let r=1; r*cols2 < blocks.length; r++){
+    const prev = blocks.slice((r-1)*cols2, r*cols2);
+    rowTops[r] = rowTops[r-1] + Math.max(...prev.map(b=>b.h)) + rs(34);
+  }
+  blocks.forEach((b,i)=>{
+    const col = i % cols2, row = (i/cols2)|0;
+    const cx  = colStart + col*(colW + (V.mobile?rs(20):0));
+    b.parts.forEach(({m,dy,k})=>{
+      flow.pin(m, m.userData.box.h, rowTops[row]+dy,
+               cx + m.userData.box.w/2 - m.userData.box.pad, 0.4);
+      world.add(m); reveal(m, {dy:rs(16), dz:-rs(28), rx:0.02});
+      if (k) hitFor(m, m.userData.box.w, m.userData.box.h, k, {label:k});
+    });
+    deepest = Math.max(deepest, rowTops[row] + b.h);
+  });
+
+  /* connect */
+  const cx = V.mobile ? left : left + rs(320) + 3*colW;
+  const cy = V.mobile ? deepest + rs(30) : flow.y + rs(150);
+  const ch = textMesh({runs:[{s:'CONNECT', size:rs(11.5), weight:600, color:'#8A8A8A', ls:rs(0.9)}]});
+  flow.pin(ch, ch.userData.box.h, cy, cx + ch.userData.box.w/2 - ch.userData.box.pad, 0.4);
+  world.add(ch); reveal(ch, {dy:rs(16), dz:-rs(28), rx:0.02});
+  /* sit the icons under the measured label box, not under a guessed offset */
+  const icoTop = cy + ch.userData.box.h + rs(6);
+  [['discordF',0],['github',1]].forEach(([k,i])=>{
+    const t = assetTex(k);
+    if (!t) return;
+    const s = rs(19);
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(px(s),px(s)), matInk(t, {opacity:.72}));
+    flow.pin(m, s, icoTop, cx + s/2 + i*rs(30), 0.4);
+    world.add(m); reveal(m, {dy:rs(14), dz:-rs(24), rx:0.02});
+    hitFor(m, s, s, k==='github'?'github':'discord',
+           {label:k==='github'?'GitHub':'Discord'});
+  });
+  deepest = Math.max(deepest, icoTop + rs(24));
+
+  /* baseline */
+  const bl = deepest + rs(64);
+  const l1 = textMesh({runs:[{s:COPY.footer.left, size:rs(13), weight:400, color:T.muted}]});
+  flow.pin(l1, l1.userData.box.h, bl, left + l1.userData.box.w/2 - l1.userData.box.pad, 0.4);
+  world.add(l1);
+  const l2 = textMesh({runs:[{s:COPY.footer.right, size:rs(13), weight:400, color:T.muted}]});
+  flow.pin(l2, l2.userData.box.h, bl, V.col/2 - l2.userData.box.w/2 + l2.userData.box.pad, 0.4);
+  world.add(l2);
+
+  flow.y = bl + rs(70);
+  band(top, flow.y - top, T.bgAlt, 0);
+
+  /* the amber strip returns to close the page */
+  const strip = new THREE.Mesh(new THREE.PlaneGeometry(px(V.w+4), px(M.stripH)), stripMaterial());
+  strip.material.depthTest = true;
+  flow.pin(strip, M.stripH, flow.y - M.stripH, 0, 0.5);
+  world.add(strip);
+  ANIM.push(t=>{ strip.material.uniforms.t.value = t; });
+}
+
+/* ##S16-SCROLL =============================================================
+   The document is a plain tall spacer, so the browser keeps native inertia,
+   keyboard paging and the scrollbar. All we do is convert scrollY into a
+   camera translation, damp it, and let the reveal registry scrub off it.
+   ======================================================================== */
+const spaceEl = document.getElementById('space');
+const SCROLL = { raw:0, smooth:0, docH:0, vel:0 };
+const MOUSE  = { x:0, y:0, tx:0, ty:0 };
+
+window.addEventListener('scroll', ()=>{ SCROLL.raw = window.scrollY || window.pageYOffset || 0; },
+                        {passive:true});
+window.addEventListener('pointermove', e=>{
+  MOUSE.tx = (e.clientX / window.innerWidth  - 0.5) * 2;
+  MOUSE.ty = (e.clientY / window.innerHeight - 0.5) * 2;
+}, {passive:true});
+
+/* ##BUILD ORCHESTRATION ---------------------------------------------------
+   Everything is rebuilt on a meaningful resize: type is rasterised at the live
+   column width, so re-flowing is the only way to keep it sharp and correctly
+   broken. Cheap enough because the asset textures are cached across builds. */
+function disposeWorld(){
+  /* asset textures are shared across rebuilds and must survive; anything else
+     on this graph was generated for this layout and is ours to free */
+  const CACHED = new Set(TEXCACHE.values());
+  const kill = o=>{
+    if (o.geometry) o.geometry.dispose();
+    const ms = o.material ? (Array.isArray(o.material)?o.material:[o.material]) : [];
+    ms.forEach(m=>{
+      ['map','alphaMap','roughnessMap'].forEach(k=>{
+        const t = m[k];
+        if (t && !CACHED.has(t) && t !== GRAIN) t.dispose();
+      });
+      m.dispose();
+    });
+  };
+  world.traverse(kill); navRoot.traverse(kill);
+  world.clear(); navRoot.clear();
+  clearHits();
+  ANIM.length = 0; REVEAL.length = 0; SCRUB.length = 0;
+}
+
+function measureViewport(){
+  /* a pane that has not been laid out yet reports 0; never let that reach layout */
+  V.w = Math.max(320, window.innerWidth  || document.documentElement.clientWidth  || 1280);
+  V.h = Math.max(420, window.innerHeight || document.documentElement.clientHeight || 820);
+  V.dpr = Math.min(window.devicePixelRatio || 1, 2);
+  V.mobile = V.w < 760;
+  const gut = V.mobile ? 18 : 40;
+  V.col = Math.min(M.colMax, V.w - gut*2);
+  S = clamp(V.col / M.colMax, V.mobile ? 0.62 : 0.78, 1.0);
+}
+
+function buildWorld(){
+  disposeWorld();
+  flow.y = 0;
+
+  buildNav();
+
+  /* Hero and AI keep their separately tuned entrances. */
+  REVEAL_ON = true;  sectionHero();  REVEAL_ON = false;
+
+  /* the three product acts sit on one near-full-bleed white panel */
+  const whiteTop = flow.y - rs(40);
+  sectionAdd();
+  sectionTxn();
+  sectionBudget();
+  const wp = band(whiteTop, flow.y - whiteTop, T.white, rs(M.radPanel));
+  wp.position.z = px(-1.4);
+
+  sectionTrust();
+  REVEAL_ON = true;  sectionAI();     REVEAL_ON = false;
+  sectionCTA();
+  sectionFooter();
+
+  SCROLL.docH = flow.y;
+  spaceEl.style.height = Math.round(SCROLL.docH) + 'px';
+
+  camera.fov = FOV;
+  camera.aspect = V.w / V.h;
+  camera.position.set(0, -px(V.h/2), camZ());
+  camera.updateProjectionMatrix();
+
+  overlayCam.left = -V.w/2; overlayCam.right = V.w/2;
+  overlayCam.top  =  V.h/2; overlayCam.bottom = -V.h/2;
+  overlayCam.near = -100;   overlayCam.far = 100;
+  overlayCam.updateProjectionMatrix();
+
+  renderer.setPixelRatio(V.dpr);
+  renderer.setSize(V.w, V.h, false);
+
+  /* land on the correct pose immediately instead of animating in from zero */
+  SCROLL.smooth = SCROLL.raw = window.scrollY || 0;
+  applyReveals(SCROLL.smooth);
+  SCRUB.forEach(f=>f(SCROLL.smooth));
+}
+
+/* ##S17-BOOT =============================================================== */
+let last = performance.now(), clock = 0;
+
+function frame(now){
+  const dt = Math.min(0.05, (now - last)/1000); last = now;
+  clock += dt;
+
+  const prev = SCROLL.smooth;
+  SCROLL.smooth = damp(SCROLL.smooth, SCROLL.raw, 0.000008, dt);
+  SCROLL.vel    = damp(SCROLL.vel, (SCROLL.smooth - prev)/Math.max(dt,0.001), 0.0004, dt);
+
+  /* document y 0 is the top edge of the viewport, not its centre */
+  camera.position.y = -px(SCROLL.smooth + V.h/2);
+
+  /* pointer parallax — small enough to read as depth, not as a gimmick */
+  /* pointer parallax, hero only. This moves the camera, so left unscoped it
+     drags every section on the page sideways with the cursor no matter where
+     you've scrolled to. heroT fades it to exactly zero once the hero has
+     genuinely scrolled out of view, so everything after sits rigid under the
+     pointer. The scroll-velocity kick on rotation.x is left alone: it is
+     driven by scrolling, not pointer position, so it isn't the motion being
+     removed here. */
+  MOUSE.x = damp(MOUSE.x, MOUSE.tx, 0.002, dt);
+  MOUSE.y = damp(MOUSE.y, MOUSE.ty, 0.002, dt);
+  const heroT = 1 - smooth(clamp(inv(HERO_END - V.h, HERO_END, SCROLL.smooth), 0, 1));
+  camera.position.x = px(MOUSE.x * 9 * heroT);
+  camera.rotation.y = -MOUSE.x * 0.011 * heroT;
+  camera.rotation.x =  MOUSE.y * 0.006 * heroT + clamp(SCROLL.vel, -4000, 4000) * 0.0000045;
+
+  applyReveals(SCROLL.smooth);
+  for (let i=0;i<SCRUB.length;i++)  SCRUB[i](SCROLL.smooth);
+  for (let i=0;i<ANIM.length;i++)   ANIM[i](clock, dt);
+  stepHovers(dt);
+  /* the header's detach is a threshold with an eased transition, matching the
+     component's `useScroll(10)` plus its CSS ease-out */
+  NAV.want = (SCROLL.smooth > 10 && !NAV.open) ? 1 : 0;
+  NAV.t = damp(NAV.t, NAV.want, 3e-7, dt);
+  layoutNav(NAV.t);
+  camera.updateMatrixWorld();
+  syncHits();
+
+  renderer.render(scene, camera);
+  renderer.autoClear = false;
+  renderer.render(overlay, overlayCam);
+  renderer.autoClear = true;
+
+  requestAnimationFrame(frame);
+}
+
+let rzT = 0, lastW = 0, lastH = 0;
+window.addEventListener('resize', ()=>{
+  clearTimeout(rzT);
+  rzT = setTimeout(()=>{
+    /* ignore the mobile URL-bar height jitter; only a real reflow rebuilds */
+    if (Math.abs(window.innerWidth - lastW) < 2 && Math.abs(window.innerHeight - lastH) < 90){
+      V.h = window.innerHeight; V.w = window.innerWidth;
+      camera.aspect = V.w/V.h; camera.position.z = camZ(); camera.updateProjectionMatrix();
+      overlayCam.left=-V.w/2; overlayCam.right=V.w/2; overlayCam.top=V.h/2; overlayCam.bottom=-V.h/2;
+      overlayCam.updateProjectionMatrix();
+      renderer.setSize(V.w, V.h, false);
+      return;
+    }
+    lastW = window.innerWidth; lastH = window.innerHeight;
+    measureViewport(); buildWorld();
+  }, 180);
+});
+
+function fail(title, body){
+  document.getElementById('warnTitle').textContent = title;
+  document.getElementById('warnBody').innerHTML = body;
+  document.getElementById('warn').classList.add('on');
+  document.getElementById('boot').classList.add('gone');
+}
+
+async function boot(){
+  const bootEl = document.getElementById('boot');
+  const barEl  = bootEl.querySelector('.bar i');
+
+  if (typeof THREE === 'undefined'){
+    return fail('three.js failed to load',
+      'The renderer is served from cdnjs. Check the network connection and reload.');
+  }
+  try {
+    const probe = document.createElement('canvas');
+    if (!(probe.getContext('webgl2') || probe.getContext('webgl'))) throw 0;
+  } catch(e){
+    return fail('WebGL is unavailable', 'This page renders entirely through WebGL. Enable hardware acceleration and reload.');
+  }
+
+  /* fonts first — type is rasterised once, so a late swap would be permanent */
+  if (document.fonts && document.fonts.load){
+    const want = ['300 34px Geist','400 16px Geist','500 64px Geist','600 17px Geist',
+                  '400 13px "Geist Mono"','400 40px "Archivo Black"','400 40px "Peace Sans"'];
+    await Promise.all(want.map(f=>document.fonts.load(f).catch(()=>{})));
+    await document.fonts.ready.catch(()=>{});
+    try { BRAND.hasFace = document.fonts.check('400 40px "Peace Sans"'); } catch(e){}
+  }
+
+  const keys = Object.keys(A);
+  let done = 0;
+  await Promise.all(keys.map(k => loadAsset(k, A[k]).then(()=>{
+    done++; barEl.style.width = Math.round(done/keys.length*100)+'%';
+  })));
+
+  restampHeroShot();
+
+  const missing = keys.filter(k=>!IMG[k]).length;
+  if (missing > keys.length*0.5){
+    if (location.protocol === 'file:'){
+      return fail('Serve this folder over HTTP',
+        'WebGL cannot sample images loaded through <code style="display:inline;padding:2px 6px">file://</code>, so every texture is blocked. Run one of these from this folder and open the address it prints.');
+    }
+    return fail('Assets not found',
+      'The <code style="display:inline;padding:2px 6px">Assets/</code> folder has to sit next to this file. ' + missing + ' of ' + keys.length + ' files did not load.');
+  }
+
+  measureViewport();
+  lastW = V.w; lastH = V.h;
+  initStage();
+  buildWorld();
+  requestAnimationFrame(frame);
+
+  setTimeout(()=>bootEl.classList.add('gone'), 120);
+  setTimeout(()=>bootEl.remove(), 900);
+}
+
+if (document.readyState === 'complete') boot();
+else window.addEventListener('load', boot);
+</script>
+</body>
+</html>

@@ -6,6 +6,21 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "new renders Google account creation when configured" do
+    AuthConfig.stubs(:google_oauth_providers).returns([
+      { id: "google", strategy: "google_oauth2", name: "google_oauth2", label: "Sign in with Google", icon: "google" }
+    ])
+
+    get new_registration_url
+
+    assert_response :success
+    assert_match %r{/auth/google_oauth2}, @response.body
+    assert_match /#4285F4/i, @response.body
+    assert_match /Continue with Google/, @response.body
+    assert_no_match %r{/auth/openid_connect}, @response.body
+    assert_no_match %r{/auth/github}, @response.body
+  end
+
   test "create redirects to correct URL" do
     post registration_url, params: { user: {
       email: "john@example.com",
