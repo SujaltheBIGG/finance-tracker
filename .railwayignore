@@ -1,0 +1,33 @@
+# What `railway up` should not upload. The working directory carries ~400MB of
+# local-only material (dev logs, caches, the design scratch folder) against
+# ~15MB of actual application, which is enough to time the upload out.
+# Mirrors .dockerignore, plus the untracked scratch directories the image
+# never reads.
+
+/.git/
+/.bundle/
+/node_modules/
+
+# Dev logs and caches — regenerated in the container.
+/log/
+/tmp/
+/storage/
+/test-results/
+/coverage/
+
+# Never ship local secrets.
+/.env
+/.env.*
+!/.env.example
+!/.env.local.example
+!/.env.test.example
+/config/master.key
+/config/credentials/*.key
+
+# Design scratch: the landing page source-of-truth is public/landing/,
+# not these. "Founder Finance Website/" alone is 54MB (screen recording).
+/Founder Finance Website/
+/Assets/
+/index.html
+/backups/
+*.mov
