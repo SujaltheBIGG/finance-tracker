@@ -99,6 +99,12 @@ class SessionsController < ApplicationController
 
     # Destroy local session
     @session.destroy
+    # Drop the cookie here rather than leaving it for find_session_by_cookie to
+    # clear on the next request. PagesController#serve_landing_to_guest reads
+    # the raw cookie to tell "your session ended" (-> login) apart from "never
+    # signed in" (-> landing page), so a stale token surviving logout would
+    # bounce the visitor to the login form instead of the marketing site.
+    cookies.delete(:session_token)
     session.delete(:id_token_hint)
     session.delete(:sso_login_provider)
 
@@ -113,14 +119,18 @@ class SessionsController < ApplicationController
       end
     end
 
-    # Standard local logout
+    # Standard local logout. Signing out lands on the public landing page, not
+    # the login form — no flash, because that page is served as a static file
+    # and never renders one, so a notice set here would sit in the session and
+    # surface on whatever ERB page the visitor happened to open next.
     SsoAuditLog.log_logout!(user: user, request: request)
-    redirect_to new_session_path, notice: t(".logout_successful")
+    redirect_to root_path
   end
 
-  # Handle redirect back from IdP after federated logout
+  # Handle redirect back from IdP after federated logout. Same destination as a
+  # local logout, so signing out looks the same however it started.
   def post_logout
-    redirect_to new_session_path, notice: t(".logout_successful")
+    redirect_to root_path
   end
 
   def mobile_sso_start

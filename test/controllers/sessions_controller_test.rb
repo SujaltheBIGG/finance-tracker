@@ -158,11 +158,23 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     session_record = @user.sessions.last
 
     delete session_url(session_record)
-    assert_redirected_to new_session_path
-    assert_equal "You have signed out successfully.", flash[:notice]
+    assert_redirected_to root_path
 
     # Verify session is destroyed
     assert_nil Session.find_by(id: session_record.id)
+  end
+
+  test "signing out clears the session cookie so the landing page is served" do
+    sign_in @user
+    delete session_url(@user.sessions.last)
+
+    # PagesController#serve_landing_to_guest sends the landing page only when no
+    # session cookie arrives at all; a leftover token means the login form.
+    assert cookies[:session_token].blank?, "session_token cookie should be cleared on sign out"
+
+    follow_redirect!
+    assert_response :success
+    assert_no_match "Enter your password", response.body
   end
 
   test "redirects to MFA verification when MFA enabled" do

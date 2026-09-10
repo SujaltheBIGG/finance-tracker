@@ -103,8 +103,10 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
       find("#user-menu").click
       click_button "Logout"
 
-      # Trigger Capybara's wait mechanism to avoid timing issues with logout
-      find("a", text: "Sign in")
+      # Trigger Capybara's wait mechanism to avoid timing issues with logout.
+      # Signing out lands on the public landing page, which is a static WebGL
+      # document with no app chrome to wait on, so wait on the path instead.
+      assert_current_path root_path
     end
 
     def within_testid(testid)
